@@ -637,11 +637,13 @@ function buildTags() {
 
 function calcRoi() {
   let score = 5;
-  if (answers._impact_clean === 'high') score += 2;
-  if (answers._impact_clean === 'low') score -= 1;
-  if (answers._automatable_bool) score += 2;
+  const impact = answers._impact_clean || 'medium';
   const freq = (answers.frequency || '').toLowerCase();
-  if (freq.includes('multiple') || freq.includes('daily')) score += 1;
+  const auto = answers._automatable_bool || false;
+  if (impact === 'high') score += 2;
+  if (impact === 'low') score -= 1;
+  if (auto) score += 2;
+  if (freq.includes('multiple') || freq.includes('daily') || freq.includes('day')) score += 1;
   if (freq.includes('monthly')) score -= 1;
   return Math.min(10, Math.max(1, score));
 }
@@ -782,7 +784,7 @@ function renderPriorityTable() {
     el.innerHTML = '<div class="empty"><p>No submissions yet.</p></div>';
     return;
   }
-  const sorted = [...painPoints].sort((a,b)=>b.roiScore-a.roiScore);
+  const sorted = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0));
   el.innerHTML = `
     <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);overflow:hidden">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
@@ -815,7 +817,7 @@ function renderPriorityTable() {
                 <td style="padding:12px 14px;text-align:center">
                   <div style="display:flex;align-items:center;gap:6px;justify-content:center">
                     <div style="width:40px;height:4px;background:var(--gray200);border-radius:2px">
-                      <div style="height:100%;border-radius:2px;background:var(--p600);width:${p.roiScore*10}%"></div>
+                      <div style="height:100%;border-radius:2px;background:var(--p600);width:${((p.roiScore||0)*10)}%"></div>
                     </div>
                     <span style="font-size:12px;font-weight:600;color:var(--p600)">${p.roiScore}</span>
                   </div>
@@ -834,7 +836,7 @@ function renderPainPoints() {
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No pain points yet.<br>Share the home page link with your team to start collecting.</p></div>';
     return;
   }
-  grid.innerHTML = [...painPoints].sort((a,b)=>b.roiScore-a.roiScore).map(p=>`
+  grid.innerHTML = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).map(p=>`
     <div class="pp-card">
       <div class="pp-card-top"><div class="pp-title">${esc(p.title)}</div><div class="pp-date">${new Date(p.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>
       <div style="font-size:11px;color:var(--gray400);margin-bottom:6px">👤 ${esc(p.submitterName||'Anonymous')} · ${esc(p.vertical)}</div>
@@ -848,7 +850,7 @@ function renderPainPoints() {
       <div style="margin-top:10px;padding:10px;background:var(--gray50);border-radius:8px;font-size:12px;color:var(--gray600);line-height:1.5">
         <strong style="color:var(--gray700)">Desired outcome:</strong> ${esc(p.desiredOutcome)}
       </div>
-      <div class="roi-row"><div class="roi-bar"><div class="roi-fill" style="width:${p.roiScore*10}%"></div></div><span class="roi-val">${p.roiScore}/10</span></div>
+      <div class="roi-row"><div class="roi-bar"><div class="roi-fill" style="width:${((p.roiScore||0)*10)}%"></div></div><span class="roi-val">${p.roiScore}/10</span></div>
     </div>`).join('');
 }
 
@@ -1150,7 +1152,7 @@ function togglePrd(id) {
 function exportReport() {
   if (!painPoints.length) { alert('No pain points to export yet.'); return; }
   const lines = ['NAVIN — Pain Point Intelligence Report','Generated: '+new Date().toLocaleString(),'='.repeat(60),''];
-  [...painPoints].sort((a,b)=>b.roiScore-a.roiScore).forEach((p,i)=>{
+  [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).forEach((p,i)=>{
     lines.push(`${i+1}. ${p.title}`);
     lines.push(`   Submitted by: ${p.submitterName||'Anonymous'} | Vertical: ${p.vertical} | Impact: ${p.impact} | ROI: ${p.roiScore}/10 | Automatable: ${p.automatable?'Yes':'No'}`);
     lines.push(`   Problem: ${p.problem}`);
