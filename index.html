@@ -4,1182 +4,884 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAVIN — Needs Analysis & Vertical Intelligence Network</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --p900:#1a1535;--p800:#2a2155;--p700:#3d3080;--p600:#534AB7;
-    --p500:#7B72D4;--p300:#AFA9EC;--p100:#EEEDFE;
-    --t500:#1D9E75;--t100:#E1F5EE;
-    --a500:#BA7517;--a100:#FAEEDA;
-    --r500:#A32D2D;--r100:#FCEBEB;
-    --g500:#3B6D11;--g100:#EAF3DE;
-    --gray900:#111;--gray700:#333;--gray500:#666;--gray400:#888;
-    --gray200:#e5e5e5;--gray100:#f4f4f4;--gray50:#fafafa;--white:#fff;
-    --radius:14px;--shadow-lg:0 8px 40px rgba(83,74,183,.15);
-  }
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'DM Sans',sans-serif;background:var(--p900);color:var(--white);min-height:100vh;overflow-x:hidden}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(83,74,183,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 80%,rgba(29,158,117,.12) 0%,transparent 60%);pointer-events:none;z-index:0}
-  .view{display:none;min-height:100vh;position:relative;z-index:1;flex-direction:column}
-  .view.active{display:flex}
+:root {
+  --p600:#534AB7;--p700:#3d3080;--p500:#7B72D4;--p300:#AFA9EC;--p100:#EEEDFE;
+  --g500:#3B6D11;--g100:#EAF3DE;--r500:#A32D2D;--r100:#FCEBEB;
+  --a500:#BA7517;--a100:#FAEEDA;--t500:#1D9E75;--t100:#E1F5EE;
+  --gray900:#111;--gray700:#333;--gray600:#444;--gray500:#666;
+  --gray400:#888;--gray300:#bbb;--gray200:#e5e5e5;--gray100:#f4f4f4;--gray50:#fafafa;
+  --white:#fff;--radius:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#1a1535;color:#fff;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(83,74,183,.25),transparent 60%),radial-gradient(ellipse 60% 50% at 80% 80%,rgba(29,158,117,.12),transparent 60%);pointer-events:none;z-index:0}
+.view{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1}
+.view.active{display:flex}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:#fff}
+.logo-name{font-family:'Syne',sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.05em}
+.nav-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.12);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500}
+.nav-ghost:hover{background:rgba(255,255,255,.14);color:#fff}
+.nav-light{background:var(--gray100);color:var(--gray700);border:1px solid var(--gray200);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500}
+.nav-light:hover{background:var(--gray200)}
 
-  /* NAV */
-  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid rgba(255,255,255,.06)}
-  .logo{display:flex;align-items:center;gap:12px}
-  .logo-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:white;box-shadow:0 4px 16px rgba(83,74,183,.4)}
-  .logo-name{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;letter-spacing:.04em}
-  .logo-full{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;letter-spacing:.05em}
-  .nav-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;font-weight:500;border:none}
-  .nav-ghost{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.1)}
-  .nav-ghost:hover{background:rgba(255,255,255,.12);color:white}
-  .nav-light{background:var(--gray100);color:var(--gray700);border:1px solid var(--gray200)}
-  .nav-light:hover{background:var(--gray200)}
+/* LANDING */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;max-width:660px;margin:0 auto;width:100%}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(83,74,183,.2);border:1px solid rgba(83,74,183,.4);padding:6px 16px;border-radius:100px;font-size:12px;color:var(--p300);margin-bottom:28px;letter-spacing:.08em;font-weight:500}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--p300);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(34px,5vw,56px);font-weight:700;line-height:1.1;margin-bottom:20px;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--p300)}
+.hero p{font-size:16px;color:rgba(255,255,255,.55);line-height:1.7;max-width:460px;margin:0 auto 36px}
+.start-btn{display:inline-flex;align-items:center;gap:10px;background:var(--p600);color:#fff;padding:15px 34px;border-radius:100px;font-size:15px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(83,74,183,.4);transition:all .2s}
+.start-btn:hover{background:var(--p700);transform:translateY(-2px)}
+.hero-note{margin-top:14px;font-size:12px;color:rgba(255,255,255,.3)}
 
-  /* LANDING */
-  .hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px 40px;text-align:center;max-width:680px;margin:0 auto;width:100%}
-  .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(83,74,183,.2);border:1px solid rgba(83,74,183,.4);padding:6px 16px;border-radius:100px;font-size:12px;color:var(--p300);margin-bottom:28px;letter-spacing:.08em;font-weight:500}
-  .hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--p300);display:inline-block;animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  h1{font-family:'Syne',sans-serif;font-size:clamp(36px,5vw,58px);font-weight:700;line-height:1.1;margin-bottom:20px;letter-spacing:-.02em}
-  h1 em{font-style:normal;color:var(--p300)}
-  .hero p{font-size:16px;color:rgba(255,255,255,.55);line-height:1.7;max-width:480px;margin:0 auto 36px}
-  .start-btn{display:inline-flex;align-items:center;gap:10px;background:var(--p600);color:white;padding:16px 36px;border-radius:100px;font-size:15px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(83,74,183,.45);transition:all .2s}
-  .start-btn:hover{background:var(--p700);transform:translateY(-2px)}
-  .hero-note{margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)}
+/* CHAT VIEW */
+#view-chat{background:var(--white)}
+#view-chat nav{background:var(--white);border-bottom:1px solid var(--gray200)}
+.chat-shell{flex:1;display:flex;flex-direction:column;max-width:720px;margin:0 auto;width:100%;padding:0 24px 24px}
+.chat-intro{padding:24px 0 18px;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--gray200);margin-bottom:18px}
+.navin-avi{width:44px;height:44px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:15px}
+.chat-intro h3{font-size:14px;font-weight:500;color:var(--gray900);margin-bottom:3px}
+.chat-intro p{font-size:13px;color:var(--gray500);line-height:1.5}
+.progress-wrap{margin-bottom:16px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--gray400);margin-bottom:5px}
+.progress-bar{height:3px;background:var(--gray200);border-radius:2px}
+.progress-fill{height:100%;border-radius:2px;background:var(--p600);transition:width .4s ease;width:0%}
+.messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:14px;max-height:calc(100vh - 340px)}
+.msg{display:flex;gap:9px;align-items:flex-start;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{flex-direction:row-reverse}
+.msg-avi{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.msg.ai .msg-avi{background:var(--p100);color:var(--p600)}
+.msg.user .msg-avi{background:var(--gray200);color:var(--gray700)}
+.bubble{max-width:78%;padding:11px 15px;font-size:14px;line-height:1.65;border-radius:18px;white-space:pre-wrap}
+.msg.ai .bubble{background:var(--gray100);color:var(--gray900);border-top-left-radius:4px}
+.msg.user .bubble{background:var(--p600);color:#fff;border-top-right-radius:4px}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 12px 37px}
+.chip-btn{padding:7px 14px;border-radius:100px;border:1.5px solid var(--p300);background:var(--p100);color:var(--p700);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;transition:all .15s}
+.chip-btn:hover{background:var(--p600);color:#fff;border-color:var(--p600)}
+.chat-input-row{border-top:1px solid var(--gray200);padding-top:14px;display:flex;gap:9px;align-items:flex-end}
+.chat-input-row textarea{flex:1;padding:11px 15px;font-size:14px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--gray200);border-radius:14px;resize:none;min-height:46px;max-height:110px;line-height:1.5;color:var(--gray900);outline:none;transition:border-color .15s}
+.chat-input-row textarea:focus{border-color:var(--p500)}
+.chat-input-row textarea:disabled{background:var(--gray100);color:var(--gray400)}
+#send-btn{width:46px;height:46px;border-radius:50%;background:var(--p600);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;transition:all .2s}
+#send-btn:hover{background:var(--p700);transform:scale(1.05)}
+#send-btn:disabled{background:var(--gray200);color:var(--gray400);cursor:not-allowed;transform:none}
+.done-card{background:var(--g100);border:1px solid #97C459;border-radius:var(--radius);padding:15px 18px;display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.done-card svg{width:20px;height:20px;color:var(--g500);flex-shrink:0}
+.done-card p{font-size:13px;color:var(--g500);line-height:1.5}
 
-  /* CHAT */
-  #view-chat{background:var(--white)}
-  #view-chat nav{background:var(--white);border-bottom:1px solid var(--gray200)}
-  .chat-shell{flex:1;display:flex;flex-direction:column;max-width:740px;margin:0 auto;width:100%;padding:0 24px 24px}
-  .chat-intro{padding:28px 0 20px;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--gray200);margin-bottom:20px}
-  .navin-avi{width:46px;height:46px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:white;font-size:16px}
-  .chat-intro-text h3{font-size:15px;font-weight:500;color:var(--gray900);margin-bottom:4px}
-  .chat-intro-text p{font-size:13px;color:var(--gray500);line-height:1.5}
+/* DASHBOARD */
+#view-dash{background:var(--gray50)}
+#view-dash nav{background:var(--white);border-bottom:1px solid var(--gray200)}
+.dash-body{flex:1;padding:28px 36px;max-width:1080px;margin:0 auto;width:100%}
+.dash-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
+.dash-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--gray900)}
+.dash-sub{font-size:13px;color:var(--gray500);margin-bottom:24px}
+.dash-actions{display:flex;gap:8px}
+.btn-sm{font-size:12px;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border:none;transition:all .15s}
+.btn-refresh{background:var(--gray100);color:var(--gray600);border:1px solid var(--gray200)}
+.btn-refresh:hover{background:var(--gray200)}
+.btn-export{background:var(--p100);color:var(--p700);border:1px solid var(--p300)}
+.btn-export:hover{background:var(--p600);color:#fff;border-color:var(--p600)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric{background:var(--white);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--gray200)}
+.metric-lbl{font-size:11px;color:var(--gray500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.metric-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--gray900)}
+.metric-hint{font-size:11px;color:var(--gray400);margin-top:3px}
+.sec-hd{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--gray700);letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px}
+.card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius)}
 
-  /* PROGRESS BAR */
-  .progress-wrap{padding:0 0 16px}
-  .progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--gray400);margin-bottom:6px}
-  .progress-bar{height:3px;background:var(--gray200);border-radius:2px}
-  .progress-fill{height:100%;border-radius:2px;background:var(--p600);transition:width .4s ease}
+/* SUMMARY */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 
-  .messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-bottom:16px;min-height:0;max-height:calc(100vh - 360px)}
-  .msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .25s ease}
-  @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .msg.user{flex-direction:row-reverse}
-  .msg-avi{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
-  .msg.ai .msg-avi{background:var(--p100);color:var(--p600)}
-  .msg.user .msg-avi{background:var(--gray200);color:var(--gray700)}
-  .bubble{max-width:78%;padding:12px 16px;font-size:14px;line-height:1.65;border-radius:18px}
-  .msg.ai .bubble{background:var(--gray100);color:var(--gray900);border-top-left-radius:4px}
-  .msg.user .bubble{background:var(--p600);color:white;border-top-right-radius:4px}
+/* PRIORITY TABLE */
+.tbl-wrap{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--gray50);border-bottom:1px solid var(--gray200)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px}
+tbody tr{border-bottom:1px solid var(--gray200)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:nth-child(even){background:var(--gray50)}
+td{padding:11px 14px;color:var(--gray700);vertical-align:middle}
 
-  /* QUICK REPLY CHIPS */
-  .chips-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 12px 40px}
-  .chip-btn{padding:8px 14px;border-radius:100px;border:1.5px solid var(--p300);background:var(--p100);color:var(--p700);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;font-weight:500}
-  .chip-btn:hover{background:var(--p600);color:white;border-color:var(--p600)}
+/* DETAIL CARDS */
+.pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.pp-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:16px 18px;transition:box-shadow .2s}
+.pp-card:hover{box-shadow:0 4px 20px rgba(83,74,183,.1);border-color:var(--p300)}
+.pp-title{font-size:14px;font-weight:500;color:var(--gray900);margin-bottom:3px}
+.pp-meta{font-size:11px;color:var(--gray400);margin-bottom:7px}
+.pp-problem{font-size:12px;color:var(--gray500);line-height:1.5;margin-bottom:9px}
+.pp-outcome{font-size:12px;color:var(--gray600);background:var(--gray50);border-radius:8px;padding:8px 10px;margin-bottom:9px;line-height:1.5}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.tag{font-size:11px;padding:2px 8px;border-radius:100px;font-weight:500}
+.tag-vert{background:var(--p100);color:var(--p700)}
+.tag-high{background:var(--r100);color:var(--r500)}
+.tag-medium{background:var(--a100);color:var(--a500)}
+.tag-low{background:var(--g100);color:var(--g500)}
+.tag-auto{background:var(--t100);color:var(--t500)}
+.tag-neutral{background:var(--gray100);color:var(--gray500)}
+.roi-row{display:flex;align-items:center;gap:8px}
+.roi-bar{flex:1;height:3px;background:var(--gray200);border-radius:2px}
+.roi-fill{height:100%;border-radius:2px;background:var(--p600)}
+.roi-val{font-size:11px;font-weight:600;color:var(--p600);min-width:28px}
+.priority-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px}
 
-  /* TEXT INPUT */
-  .chat-input-area{border-top:1px solid var(--gray200);padding-top:16px;display:flex;gap:10px;align-items:flex-end}
-  textarea#inp{flex:1;padding:12px 16px;font-size:14px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--gray200);border-radius:14px;resize:none;min-height:48px;max-height:120px;line-height:1.5;color:var(--gray900);background:var(--white);outline:none;transition:border-color .15s}
-  textarea#inp:focus{border-color:var(--p500)}
-  textarea#inp::placeholder{color:var(--gray400)}
-  textarea#inp:disabled{background:var(--gray100);color:var(--gray400)}
-  #send-btn{width:48px;height:48px;border-radius:50%;background:var(--p600);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;color:white}
-  #send-btn:hover{background:var(--p700);transform:scale(1.05)}
-  #send-btn:disabled{background:var(--gray200);color:var(--gray400);cursor:not-allowed;transform:none}
+/* PRD */
+.prd-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.prd-hd{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.prd-hd:hover{background:var(--gray50)}
+.prd-hd-title{font-size:14px;font-weight:500;color:var(--gray900)}
+.prd-hd-sub{font-size:12px;color:var(--gray500);margin-top:2px}
+.prd-hd-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.chevron{font-size:18px;color:var(--gray400);transition:transform .2s;display:inline-block;line-height:1}
+.prd-body{display:none;padding:18px;border-top:1px solid var(--gray200)}
+.prd-body.open{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.prd-sec h4{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--gray400);margin-bottom:7px;font-weight:600}
+.prd-sec p,.prd-sec li{font-size:13px;color:var(--gray700);line-height:1.6}
+.prd-sec ul{padding-left:15px}
+.prd-sec li{margin-bottom:2px}
+.prd-full{grid-column:1/-1}
+.cchip{font-size:12px;padding:3px 10px;border-radius:100px;background:var(--gray100);color:var(--gray600);font-weight:500;display:inline-block;margin:2px}
+.btn-copy{font-size:12px;padding:6px 12px;border-radius:8px;background:var(--p600);color:#fff;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.btn-copy:hover{background:var(--p700)}
+.btn-paste{font-size:12px;padding:6px 12px;border-radius:8px;background:var(--g100);color:var(--g500);border:1px solid #97C459;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.btn-paste:hover{background:var(--g500);color:#fff;border-color:var(--g500)}
+.prd-ready{font-size:12px;color:var(--g500);font-weight:500}
 
-  .done-card{margin:16px 0;background:var(--g100);border:1px solid #97C459;border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:12px}
-  .done-card svg{width:22px;height:22px;color:var(--g500);flex-shrink:0}
-  .done-card p{font-size:13px;color:var(--g500);line-height:1.5}
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(20,16,50,.85);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px)}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:18px;padding:30px;box-shadow:0 16px 50px rgba(0,0,0,.25)}
+.modal-pw{width:360px;text-align:center}
+.modal-pw .m-logo{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:20px;margin:0 auto 18px}
+.modal-pw h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--gray900);margin-bottom:7px}
+.modal-pw p{font-size:13px;color:var(--gray500);margin-bottom:18px;line-height:1.5}
+.modal-pw input{width:100%;padding:11px 15px;border:1.5px solid var(--gray200);border-radius:9px;font-size:14px;margin-bottom:10px;outline:none;font-family:'DM Sans',sans-serif;color:var(--gray900);text-align:center;letter-spacing:.1em}
+.modal-pw input:focus{border-color:var(--p500)}
+.modal-pw .m-err{font-size:12px;color:var(--r500);margin-bottom:8px;display:none}
+.modal-pw .m-btn{width:100%;padding:11px;background:var(--p600);color:#fff;border:none;border-radius:9px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.modal-pw .m-btn:hover{background:var(--p700)}
+.modal-paste{width:520px;max-width:95vw}
+.modal-paste h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--gray900);margin-bottom:7px}
+.modal-paste p{font-size:13px;color:var(--gray500);margin-bottom:14px;line-height:1.5}
+.modal-paste textarea{width:100%;height:180px;padding:11px;border:1.5px solid var(--gray200);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;outline:none;color:var(--gray900);line-height:1.5}
+.modal-paste textarea:focus{border-color:var(--p500)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:11px}
+.m-cancel{padding:9px 18px;background:var(--gray100);color:var(--gray600);border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.m-save{padding:9px 18px;background:var(--p600);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.m-save:hover{background:var(--p700)}
 
-  /* DASHBOARD */
-  #view-dash{background:var(--gray50)}
-  #view-dash nav{background:var(--white);border-bottom:1px solid var(--gray200)}
-  .dash-body{flex:1;padding:32px 40px;max-width:1100px;margin:0 auto;width:100%}
-  .dash-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--gray900);margin-bottom:6px}
-  .dash-sub{font-size:13px;color:var(--gray500);margin-bottom:28px}
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
-  .metric{background:var(--white);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--gray200)}
-  .metric .lbl{font-size:11px;color:var(--gray500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-  .metric .val{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--gray900)}
-  .metric .hint{font-size:12px;color:var(--gray400);margin-top:4px}
-  .section-hd{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--gray700);letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-  .export-btn{font-size:12px;padding:7px 16px;border-radius:8px;cursor:pointer;background:var(--p100);color:var(--p700);border:1px solid var(--p300);font-weight:500;transition:all .15s;font-family:'DM Sans',sans-serif}
-  .export-btn:hover{background:var(--p600);color:white;border-color:var(--p600)}
-  .refresh-btn{font-size:12px;padding:7px 14px;border-radius:8px;cursor:pointer;background:var(--gray100);color:var(--gray500);border:1px solid var(--gray200);font-weight:500;font-family:'DM Sans',sans-serif}
-  .refresh-btn:hover{background:var(--gray200)}
-  .pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
-  .pp-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray200);padding:18px 20px;transition:box-shadow .2s}
-  .pp-card:hover{box-shadow:var(--shadow-lg);border-color:var(--p300)}
-  .pp-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-  .pp-title{font-size:14px;font-weight:500;color:var(--gray900);line-height:1.4;flex:1;padding-right:12px}
-  .pp-date{font-size:11px;color:var(--gray400);white-space:nowrap}
-  .pp-problem{font-size:12px;color:var(--gray500);line-height:1.5;margin-bottom:10px}
-  .pp-tags{display:flex;flex-wrap:wrap;gap:5px}
-  .tag{font-size:11px;padding:3px 9px;border-radius:100px;font-weight:500}
-  .tag.vertical{background:var(--p100);color:var(--p700)}
-  .tag.high{background:var(--r100);color:var(--r500)}
-  .tag.medium{background:var(--a100);color:var(--a500)}
-  .tag.low{background:var(--g100);color:var(--g500)}
-  .tag.auto{background:var(--t100);color:var(--t500)}
-  .tag.neutral{background:var(--gray100);color:var(--gray500)}
-  .roi-row{display:flex;align-items:center;gap:8px;margin-top:10px}
-  .roi-bar{flex:1;height:3px;background:var(--gray200);border-radius:2px}
-  .roi-fill{height:100%;border-radius:2px;background:var(--p600)}
-  .roi-val{font-size:11px;font-weight:600;color:var(--p600);min-width:28px}
+/* SETTINGS */
+.settings-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:16px 18px;margin-bottom:24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.settings-card label{font-size:12px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.settings-card input{flex:1;min-width:200px;padding:8px 13px;border:1.5px solid var(--gray200);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--gray900);outline:none}
+.settings-card input:focus{border-color:var(--p500)}
+.settings-card button{padding:8px 16px;border-radius:8px;background:var(--p600);color:#fff;border:none;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap}
+.settings-card button:hover{background:var(--p700)}
+.saved-ok{font-size:12px;color:var(--g500);font-weight:500;display:none}
 
-  /* PRD CARDS */
-  .prd-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray200);margin-bottom:12px;overflow:hidden}
-  .prd-hd{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s}
-  .prd-hd:hover{background:var(--gray50)}
-  .prd-hd-title{font-size:14px;font-weight:500;color:var(--gray900)}
-  .prd-hd-sub{font-size:12px;color:var(--gray500);margin-top:2px}
-  .prd-hd-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-  .chevron{font-size:18px;color:var(--gray400);transition:transform .2s;display:inline-block}
-  .prd-body{display:none;padding:20px;border-top:1px solid var(--gray200)}
-  .prd-body.open{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .prd-section h4{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--gray400);margin-bottom:8px;font-weight:600}
-  .prd-section p,.prd-section li{font-size:13px;color:var(--gray700);line-height:1.6}
-  .prd-section ul{padding-left:16px}
-  .prd-section li{margin-bottom:3px}
-  .complexity-chips{display:flex;flex-wrap:wrap;gap:6px}
-  .cchip{font-size:12px;padding:4px 12px;border-radius:100px;background:var(--gray100);color:var(--gray600);font-weight:500}
-  .prd-full{grid-column:1/-1}
+.empty-msg{text-align:center;padding:40px 20px;color:var(--gray400);font-size:14px}
+.spin-row{display:flex;align-items:center;gap:8px;padding:20px;color:var(--gray500);font-size:13px}
+.spinner{width:15px;height:15px;border:2px solid var(--gray200);border-top-color:var(--p600);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* PRD BUTTONS */
-  .copy-prd-btn{font-size:12px;padding:7px 13px;border-radius:8px;background:var(--p600);color:white;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
-  .copy-prd-btn:hover{background:var(--p700)}
-  .paste-prd-btn{font-size:12px;padding:7px 13px;border-radius:8px;background:var(--g100);color:var(--g500);border:1px solid #97C459;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s;white-space:nowrap}
-  .paste-prd-btn:hover{background:var(--g500);color:white;border-color:var(--g500)}
-  .prd-ready-badge{font-size:12px;color:var(--g500);font-weight:500;display:flex;align-items:center;gap:4px}
-
-  /* PASTE MODAL */
-  .modal-bg{position:fixed;inset:0;background:rgba(26,21,53,.85);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px)}
-  .modal-bg.open{display:flex}
-  .modal-card{background:white;border-radius:20px;padding:32px;width:560px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-  .modal-card h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--gray900);margin-bottom:8px}
-  .modal-card p{font-size:13px;color:var(--gray500);margin-bottom:16px;line-height:1.6}
-  .modal-card textarea{width:100%;height:200px;padding:12px;border:1.5px solid var(--gray200);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;outline:none;color:var(--gray900);line-height:1.5}
-  .modal-card textarea:focus{border-color:var(--p500)}
-  .modal-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
-  .modal-btn-primary{padding:10px 20px;background:var(--p600);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
-  .modal-btn-primary:hover{background:var(--p700)}
-  .modal-btn-cancel{padding:10px 20px;background:var(--gray100);color:var(--gray600);border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
-
-  /* PW MODAL */
-  .pw-modal-card{background:white;border-radius:20px;padding:36px;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-  .modal-logo{width:54px;height:54px;border-radius:14px;margin:0 auto 20px;background:linear-gradient(135deg,var(--p600),var(--p500));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:white;font-size:22px}
-  .pw-modal-card h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--gray900);margin-bottom:8px}
-  .pw-modal-card p{font-size:13px;color:var(--gray500);margin-bottom:20px;line-height:1.5}
-  .pw-modal-card input{width:100%;padding:12px 16px;border:1.5px solid var(--gray200);border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;font-family:'DM Sans',sans-serif;color:var(--gray900);text-align:center;letter-spacing:.1em}
-  .pw-modal-card input:focus{border-color:var(--p500)}
-  .pw-modal-card .modal-btn-primary{width:100%;padding:12px}
-  .modal-error{font-size:12px;color:var(--r500);margin-bottom:10px;display:none}
-
-  /* SETTINGS */
-  .settings-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:20px;margin-bottom:28px}
-  .settings-card h3{font-size:12px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-  .settings-row{display:flex;gap:8px;align-items:center}
-  .settings-row input{flex:1;padding:9px 14px;border:1.5px solid var(--gray200);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--gray900);outline:none}
-  .settings-row input:focus{border-color:var(--p500)}
-  .settings-row button{padding:9px 18px;border-radius:8px;background:var(--p600);color:white;border:none;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500}
-  .saved-badge{font-size:12px;color:var(--g500);font-weight:500;display:none}
-
-  /* MISC */
-  .empty{text-align:center;padding:60px 24px;color:var(--gray400);grid-column:1/-1}
-  .empty p{font-size:14px;line-height:1.6}
-  .loading-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray500);padding:20px 0;grid-column:1/-1}
-  .spinner{width:16px;height:16px;border:2px solid var(--gray200);border-top-color:var(--p600);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  @media(max-width:700px){
-    nav{padding:14px 18px}
-    .pp-grid,.metrics{grid-template-columns:1fr 1fr}
-    .dash-body{padding:20px 18px}
-    .prd-body.open{grid-template-columns:1fr}
-    .pp-grid{grid-template-columns:1fr}
-  }
+@media(max-width:680px){
+  nav{padding:12px 16px}
+  .dash-body{padding:18px 16px}
+  .metrics,.pp-grid,.summary-grid{grid-template-columns:1fr 1fr}
+  .pp-grid{grid-template-columns:1fr}
+  .prd-body.open{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- ═══ LANDING ══════════════════════════════════ -->
+<!-- LANDING -->
 <div class="view active" id="view-landing">
   <nav>
     <div class="logo">
       <div class="logo-mark">N</div>
-      <div>
-        <div class="logo-name">NAVIN</div>
-        <div class="logo-full">NEEDS ANALYSIS & VERTICAL INTELLIGENCE NETWORK</div>
-      </div>
+      <div><div class="logo-name">NAVIN</div><div class="logo-sub">NEEDS ANALYSIS & VERTICAL INTELLIGENCE NETWORK</div></div>
     </div>
-    <button class="nav-btn nav-ghost" onclick="openDash()">Leadership dashboard →</button>
+    <button class="nav-ghost" onclick="openDash()">Leadership dashboard →</button>
   </nav>
   <div class="hero">
-    <div class="hero-badge"><span></span> Always listening</div>
+    <div class="badge"><span class="badge-dot"></span> Always listening</div>
     <h1>Your ideas &amp; challenges<br><em>deserve to be heard</em></h1>
-    <p>Tell NAVIN about a problem your team faces every day. NAVIN will ask the right questions, document everything, and help leadership prioritize the best solutions.</p>
+    <p>Tell NAVIN about a problem your team faces every day. NAVIN will ask the right questions and document everything for the digital innovation team.</p>
     <button class="start-btn" onclick="startChat()">
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
       Share a pain point
     </button>
     <p class="hero-note">Takes about 3 minutes · Goes directly to the innovation team</p>
   </div>
 </div>
 
-<!-- ═══ CHAT ═════════════════════════════════════ -->
+<!-- CHAT -->
 <div class="view" id="view-chat">
-  <nav style="background:white;border-bottom:1px solid var(--gray200)">
+  <nav style="background:#fff;border-bottom:1px solid var(--gray200)">
     <div class="logo">
       <div class="logo-mark">N</div>
-      <div>
-        <div class="logo-name" style="color:var(--gray900)">NAVIN</div>
-        <div class="logo-full" style="color:var(--gray400)">NEEDS ANALYSIS & VERTICAL INTELLIGENCE NETWORK</div>
-      </div>
+      <div><div class="logo-name" style="color:var(--gray900)">NAVIN</div><div class="logo-sub" style="color:var(--gray400)">NEEDS ANALYSIS & VERTICAL INTELLIGENCE NETWORK</div></div>
     </div>
-    <button class="nav-btn nav-light" onclick="showView('view-landing')">← Back</button>
+    <button class="nav-light" onclick="showView('view-landing')">← Back</button>
   </nav>
   <div class="chat-shell">
     <div class="chat-intro">
       <div class="navin-avi">N</div>
-      <div class="chat-intro-text">
-        <h3>NAVIN — Pain Point Analyst</h3>
-        <p>I'll ask you a few quick questions to document your challenge properly. Everything goes directly to the digital innovation team.</p>
-      </div>
+      <div><h3>NAVIN — Pain Point Analyst</h3><p>I'll ask you a few questions to document your challenge properly. Everything goes directly to the digital innovation team.</p></div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span id="progress-text">Getting started</span><span id="progress-pct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-label"><span id="prog-label">Getting started</span><span id="prog-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
     </div>
     <div id="done-card" class="done-card" style="display:none">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <p><strong>Thank you — your challenge has been documented.</strong> The digital innovation team will review it and follow up if needed. You can close this page or <a href="#" onclick="startChat();return false" style="color:var(--g500);font-weight:500">submit another</a>.</p>
+      <p><strong>Thank you — documented.</strong> The digital innovation team will review it and follow up with you. <a href="#" onclick="startChat();return false" style="color:var(--g500);font-weight:500">Submit another?</a></p>
     </div>
     <div class="messages" id="messages"></div>
-    <div id="chips-area" class="chips-wrap" style="display:none"></div>
-    <div class="chat-input-area">
-      <textarea id="inp" placeholder="Type your answer here..." rows="1"
-        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <div id="chips" class="chips-wrap" style="display:none"></div>
+    <div class="chat-input-row">
+      <textarea id="inp" placeholder="Type your answer..." rows="1" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
       <button id="send-btn" onclick="sendText()">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>
+        <svg width="19" height="19" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
   </div>
 </div>
 
-<!-- ═══ DASHBOARD ════════════════════════════════ -->
+<!-- DASHBOARD -->
 <div class="view" id="view-dash">
-  <nav style="background:white;border-bottom:1px solid var(--gray200)">
+  <nav style="background:#fff;border-bottom:1px solid var(--gray200)">
     <div class="logo">
       <div class="logo-mark">N</div>
-      <div>
-        <div class="logo-name" style="color:var(--gray900)">NAVIN</div>
-        <div class="logo-full" style="color:var(--gray400)">LEADERSHIP DASHBOARD</div>
-      </div>
+      <div><div class="logo-name" style="color:var(--gray900)">NAVIN</div><div class="logo-sub" style="color:var(--gray400)">LEADERSHIP DASHBOARD</div></div>
     </div>
-    <button class="nav-btn nav-light" onclick="showView('view-landing')">← Home</button>
+    <button class="nav-light" onclick="showView('view-landing')">← Home</button>
   </nav>
   <div class="dash-body">
+
     <div class="settings-card">
-      <h3>Backend connection</h3>
-      <div class="settings-row">
-        <input type="text" id="backend-url-input" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" />
-        <button onclick="saveBackendUrl()">Connect</button>
-        <span class="saved-badge" id="url-saved">✓ Connected</span>
-      </div>
+      <label>Backend URL</label>
+      <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec"/>
+      <button onclick="connectBackend()">Connect</button>
+      <span class="saved-ok" id="saved-ok">✓ Connected</span>
     </div>
-    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+
+    <div class="dash-top">
       <div class="dash-title">Pain Point Intelligence</div>
-      <div style="display:flex;gap:8px">
-        <button class="refresh-btn" onclick="loadSubmissions()">↻ Refresh</button>
-        <button class="export-btn" onclick="exportReport()">Export report</button>
+      <div class="dash-actions">
+        <button class="btn-sm btn-refresh" onclick="loadData()">↻ Refresh</button>
+        <button class="btn-sm btn-export" onclick="exportReport()">Export report</button>
       </div>
     </div>
     <div class="dash-sub" id="dash-sub">Connect your backend URL above to load submissions.</div>
 
     <div class="metrics">
-      <div class="metric"><div class="lbl">Total submitted</div><div class="val" id="m-total">—</div></div>
-      <div class="metric"><div class="lbl">High impact</div><div class="val" id="m-high">—</div><div class="hint">need priority attention</div></div>
-      <div class="metric"><div class="lbl">Automatable</div><div class="val" id="m-auto">—</div><div class="hint">identified opportunities</div></div>
-      <div class="metric"><div class="lbl">Verticals</div><div class="val" id="m-verts">—</div><div class="hint">departments represented</div></div>
+      <div class="metric"><div class="metric-lbl">Total submitted</div><div class="metric-val" id="m-total">—</div></div>
+      <div class="metric"><div class="metric-lbl">High impact</div><div class="metric-val" id="m-high">—</div><div class="metric-hint">need priority attention</div></div>
+      <div class="metric"><div class="metric-lbl">Automatable</div><div class="metric-val" id="m-auto">—</div><div class="metric-hint">identified opportunities</div></div>
+      <div class="metric"><div class="metric-lbl">Verticals</div><div class="metric-val" id="m-verts">—</div><div class="metric-hint">departments represented</div></div>
     </div>
 
-    <!-- SUMMARY PANEL -->
-    <div id="summary-panel" style="display:none;margin-bottom:28px">
-      <div class="section-hd" style="margin-bottom:12px">Submissions summary</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-        <!-- By vertical -->
-        <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:12px">Submissions by department</div>
-          <div id="summary-verticals"></div>
+    <div id="summary-section" style="display:none;margin-bottom:24px">
+      <div class="sec-hd">Submissions summary</div>
+      <div class="summary-grid">
+        <div class="card" style="padding:16px 18px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:11px">By department</div>
+          <div id="sum-verts"></div>
         </div>
-        <!-- By impact -->
-        <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:12px">Impact breakdown</div>
-          <div id="summary-impact"></div>
+        <div class="card" style="padding:16px 18px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:11px">Impact breakdown</div>
+          <div id="sum-impact"></div>
         </div>
       </div>
-      <!-- Recurring themes -->
-      <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:10px">Recurring themes &amp; tags</div>
-        <div id="summary-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      <div class="card" style="padding:16px 18px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:9px">Recurring themes</div>
+        <div id="sum-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
-      <!-- Automation opportunities -->
-      <div id="automation-panel" style="background:var(--t100);border:1px solid #5DCAA5;border-radius:var(--radius);padding:16px 20px">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t500);margin-bottom:10px">🤖 Automation opportunities</div>
-        <div id="summary-auto"></div>
+      <div id="auto-panel" class="card" style="padding:16px 18px;border-color:#5DCAA5;background:var(--t100)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t500);margin-bottom:9px">🤖 Automation opportunities</div>
+        <div id="sum-auto"></div>
       </div>
     </div>
 
-    <!-- PRIORITY TABLE -->
-    <div class="section-hd" style="margin-bottom:12px">Priority ranking by ROI</div>
-    <div id="priority-table" style="margin-bottom:28px">
-      <div class="loading-row"><div class="spinner"></div> Connect backend to load…</div>
+    <div class="sec-hd">Priority ranking by ROI</div>
+    <div id="priority-section" class="tbl-wrap" style="margin-bottom:24px">
+      <div class="spin-row"><div class="spinner"></div> Connect backend to load…</div>
     </div>
 
-    <!-- DETAIL CARDS -->
-    <div class="section-hd" style="margin-bottom:12px">All submissions — detail view</div>
-    <div class="pp-grid" id="pp-grid"></div>
-
-    <div class="section-hd" style="margin-top:8px">
-      Solution Studio — PRD Generator
-      <span style="font-size:11px;font-weight:400;color:var(--gray400);text-transform:none;letter-spacing:0">Powered by your Claude subscription · free</span>
+    <div class="sec-hd">All submissions — detail view</div>
+    <div id="cards-section" class="pp-grid">
+      <div class="empty-msg" style="grid-column:1/-1">Connect backend to load…</div>
     </div>
-    <div id="prd-list"></div>
-  </div>
-</div>
 
-<!-- PASTE PRD MODAL -->
-<div class="modal-bg" id="paste-modal">
-  <div class="modal-card">
-    <h2>Paste Claude's response</h2>
-    <p>Go to <strong>claude.ai</strong>, paste the prompt that was copied to your clipboard, then paste Claude's full response here.</p>
-    <textarea id="paste-area" placeholder="Paste Claude's response here..."></textarea>
-    <div class="modal-actions">
-      <button class="modal-btn-cancel" onclick="closePasteModal()">Cancel</button>
-      <button class="modal-btn-primary" onclick="savePastedPrd()">Save PRD</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="sec-hd" style="margin-bottom:0">Solution Studio — PRD Generator</div>
+      <span style="font-size:11px;color:var(--gray400)">Uses your Claude subscription · free</span>
     </div>
+    <div id="prd-section"></div>
   </div>
 </div>
 
 <!-- PASSWORD MODAL -->
 <div class="modal-bg" id="pw-modal">
-  <div class="pw-modal-card">
-    <div class="modal-logo">N</div>
+  <div class="modal modal-pw">
+    <div class="m-logo">N</div>
     <h2>Leadership Access</h2>
-    <p>This dashboard is for the digital innovation team. Enter your access code to continue.</p>
-    <p class="modal-error" id="pw-error">Incorrect code. Try again.</p>
-    <input type="password" id="pw-input" placeholder="Access code" onkeydown="if(event.key==='Enter')checkPw()" />
-    <button class="modal-btn-primary" onclick="checkPw()">Enter dashboard</button>
-    <p style="margin-top:12px;font-size:12px;color:#aaa;cursor:pointer" onclick="showView('view-landing');document.getElementById('pw-modal').classList.remove('open')">← Back to home</p>
+    <p>Enter your access code to view the dashboard.</p>
+    <div class="m-err" id="pw-err">Incorrect code. Try again.</div>
+    <input type="password" id="pw-inp" placeholder="Access code" onkeydown="if(event.key==='Enter')checkPw()"/>
+    <button class="m-btn" onclick="checkPw()">Enter dashboard</button>
+    <p style="margin-top:11px;font-size:12px;color:#aaa;cursor:pointer" onclick="closeModal('pw-modal');showView('view-landing')">← Back</p>
+  </div>
+</div>
+
+<!-- PASTE PRD MODAL -->
+<div class="modal-bg" id="paste-modal">
+  <div class="modal modal-paste">
+    <h2>Paste Claude's response</h2>
+    <p>Open <strong>claude.ai</strong>, paste the copied prompt, then paste Claude's full response below.</p>
+    <textarea id="paste-inp" placeholder="Paste Claude's response here..."></textarea>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeModal('paste-modal')">Cancel</button>
+      <button class="m-save" onclick="savePrd()">Save PRD</button>
+    </div>
   </div>
 </div>
 
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────
-const DASHBOARD_PASSWORD = 'navin2024';
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+const PW = 'navin2024';
+const BACKEND = 'https://script.google.com/macros/s/AKfycbwZZTnw8Xt2MqTLvsGPR5DE8MtLHuiFTc0kFxwWQ1VERa72Ug8nVMBwzvfN8fsIGqOV/exec';
 
-// ─── TEMPLATED QUESTION FLOW ─────────────────────────────────
-// Each step: { key, question, type, chips, placeholder, validate }
-// type: 'chips' = show chip buttons, 'text' = free text, 'both' = chips + text fallback
+// ══════════════════════════════════════════════════
+// FLOW DEFINITION
+// ══════════════════════════════════════════════════
 const FLOW = [
-  {
-    key: 'submitterName',
-    question: "Hi! I'm NAVIN 👋 I'm here to help document challenges your team faces so the digital innovation team can find the best solutions and follow up with you directly.\n\nFirst — what's your name?",
-    type: 'text',
-    placeholder: 'e.g. Sarah Reyes'
-  },
-  {
-    key: 'vertical',
-    question: "Thanks {name}! Which department or team are you from?",
-    type: 'text',
-    placeholder: 'e.g. Finance, HR, Operations, Billing...'
-  },
-  {
-    key: 'title',
-    question: "Got it. In one short sentence, what is the main challenge or pain point your team is facing?",
-    type: 'text',
-    placeholder: 'e.g. We manually re-enter data between two systems every day...'
-  },
-  {
-    key: 'affected',
-    question: "Who is affected by this, and roughly how many people on your team deal with it?",
-    type: 'text',
-    placeholder: 'e.g. All 12 people on the billing team...'
-  },
-  {
-    key: 'frequency',
-    question: "How often does this happen?",
-    type: 'chips',
-    chips: ['Multiple times a day', 'Daily', 'Weekly', 'Monthly', 'During specific periods'],
-    placeholder: 'Or describe the frequency...'
-  },
-  {
-    key: 'currentWorkaround',
-    question: "What do you currently do to work around it? (Even if the answer is 'nothing' or 'we just suffer through it' — that's useful!)",
-    type: 'text',
-    placeholder: 'e.g. We use a manual Excel sheet that someone updates each morning...'
-  },
-  {
-    key: 'desiredOutcome',
-    question: "If this problem was completely solved, what would that look like? What's your ideal outcome?",
-    type: 'text',
-    placeholder: 'e.g. The data would sync automatically and we would get a daily summary...'
-  },
-  {
-    key: 'impact',
-    question: "How much impact does this have on your team's day-to-day work?",
-    type: 'chips',
-    chips: ['High — it blocks us regularly', 'Medium — it slows us down', 'Low — minor annoyance'],
-    placeholder: 'Or describe the impact...'
-  },
-  {
-    key: 'automatable',
-    question: "Last question — do you think this could be solved with a digital tool or automation, or does it need a more people/process focused solution?",
-    type: 'chips',
-    chips: ['Definitely digital / automation', 'Probably digital', 'Not sure', 'More of a process issue'],
-    placeholder: 'Or share your thoughts...'
-  }
+  { key:'submitterName', q:"Hi! I'm NAVIN 👋 I help document team challenges so the digital innovation team can build the right solutions.\n\nFirst — what's your name?", type:'text', ph:'e.g. Sarah Reyes' },
+  { key:'vertical',      q:"Thanks {name}! Which department or team are you from?", type:'text', ph:'e.g. Finance, HR, Operations, Billing...' },
+  { key:'title',         q:"Got it. In one short sentence — what is the main challenge your team is facing?", type:'text', ph:'e.g. We manually re-enter data between two systems every day...' },
+  { key:'affected',      q:"Who is affected by this, and roughly how many people deal with it?", type:'text', ph:'e.g. All 12 people on the billing team...' },
+  { key:'frequency',     q:"How often does this happen?", type:'chips', chips:['Multiple times a day','Daily','Weekly','Monthly','During specific periods'], ph:'Or describe the frequency...' },
+  { key:'currentWorkaround', q:"What do you currently do to work around it?", type:'text', ph:'e.g. We use a manual Excel sheet updated each morning...' },
+  { key:'desiredOutcome',q:"If this was completely solved, what would that look like?", type:'text', ph:'e.g. Data syncs automatically and we get a daily summary...' },
+  { key:'impact',        q:"How much does this impact your team's day-to-day work?", type:'chips', chips:['High — it blocks us regularly','Medium — it slows us down','Low — minor annoyance'], ph:'Or describe the impact...' },
+  { key:'automatable',   q:"Last one — do you think this could be solved with a digital tool or automation?", type:'chips', chips:['Definitely — digital/automation','Probably yes','Not sure','More of a process issue'], ph:'Or share your thoughts...' }
 ];
 
-const TOTAL_STEPS = FLOW.length;
-
-// ─── STATE ───────────────────────────────────────────────────
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwZZTnw8Xt2MqTLvsGPR5DE8MtLHuiFTc0kFxwWQ1VERa72Ug8nVMBwzvfN8fsIGqOV/exec';
-localStorage.setItem('navin_backend_url', BACKEND_URL); // always keep localStorage in sync
-let backendUrl = BACKEND_URL;
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let backendUrl = BACKEND;
 let painPoints = [];
 let answers = {};
-let currentStep = 0;
+let step = 0;
+let busy = false;
+let done = false;
 let activePrdId = null;
 
-// ─── NAV ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 
-function startChat() {
-  showView('view-chat');
-  initChat();
-}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function startChat() { showView('view-chat'); initChat(); }
 
 function openDash() {
-  if (sessionStorage.getItem('navin_auth') === 'yes') { showDash(); }
-  else { document.getElementById('pw-modal').classList.add('open'); setTimeout(()=>document.getElementById('pw-input').focus(),100); }
+  if (sessionStorage.getItem('nav_auth') === '1') { showDash(); }
+  else { openModal('pw-modal'); setTimeout(()=>document.getElementById('pw-inp').focus(),100); }
 }
 
 function checkPw() {
-  if (document.getElementById('pw-input').value.trim() === DASHBOARD_PASSWORD) {
-    sessionStorage.setItem('navin_auth', 'yes');
-    document.getElementById('pw-modal').classList.remove('open');
+  if (document.getElementById('pw-inp').value.trim() === PW) {
+    sessionStorage.setItem('nav_auth','1');
+    closeModal('pw-modal');
     showDash();
   } else {
-    document.getElementById('pw-error').style.display = 'block';
-    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw-inp').value = '';
   }
 }
 
 function showDash() {
   showView('view-dash');
-  if (backendUrl) { document.getElementById('backend-url-input').value = backendUrl; loadSubmissions(); }
+  document.getElementById('url-input').value = backendUrl;
+  loadData();
 }
 
-function saveBackendUrl() {
-  backendUrl = document.getElementById('backend-url-input').value.trim();
-  localStorage.setItem('navin_backend_url', backendUrl);
-  const b = document.getElementById('url-saved'); b.style.display='inline';
-  setTimeout(()=>b.style.display='none', 2500);
-  loadSubmissions();
+function connectBackend() {
+  const v = document.getElementById('url-input').value.trim();
+  if (!v) return;
+  backendUrl = v;
+  const ok = document.getElementById('saved-ok');
+  ok.style.display = 'inline';
+  setTimeout(()=>ok.style.display='none', 2500);
+  loadData();
 }
 
-// ─── CHAT FLOW ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════════
 function initChat() {
-  answers = {}; currentStep = 0;
+  answers = {}; step = 0; busy = false; done = false;
   document.getElementById('messages').innerHTML = '';
   document.getElementById('done-card').style.display = 'none';
+  document.getElementById('chips').style.display = 'none';
+  document.getElementById('chips').innerHTML = '';
   document.getElementById('inp').disabled = false;
+  document.getElementById('inp').value = '';
   document.getElementById('send-btn').disabled = false;
-  document.getElementById('chips-area').style.display = 'none';
-  document.getElementById('chips-area').innerHTML = '';
-  updateProgress(0);
-  setTimeout(() => askStep(0), 300);
+  setProgress(0);
+  setTimeout(()=>askStep(0), 300);
 }
 
 function askStep(i) {
-  if (i >= FLOW.length) { finishFlow(); return; }
-  const step = FLOW[i];
-  const question = step.question.replace('{name}', answers.submitterName ? answers.submitterName.split(' ')[0] : '');
-  appendMsg('ai', question);
-  updateProgress(i);
-  showInputFor(step);
-}
-
-function showInputFor(step) {
-  const inp = document.getElementById('inp');
-  const chipsArea = document.getElementById('chips-area');
-  chipsArea.innerHTML = '';
-
-  if (step.type === 'chips' || step.type === 'both') {
-    chipsArea.style.display = 'flex';
-    step.chips.forEach(label => {
-      const btn = document.createElement('button');
-      btn.className = 'chip-btn';
-      btn.textContent = label;
-      btn.onclick = () => selectChip(label);
-      chipsArea.appendChild(btn);
+  if (i >= FLOW.length) { finish(); return; }
+  const s = FLOW[i];
+  const q = s.q.replace('{name}', answers.submitterName ? answers.submitterName.split(' ')[0] : '');
+  addMsg('ai', q);
+  setProgress(i);
+  const chips = document.getElementById('chips');
+  chips.innerHTML = '';
+  if (s.type === 'chips') {
+    chips.style.display = 'flex';
+    s.chips.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'chip-btn'; b.textContent = c;
+      b.onclick = () => submitAns(c);
+      chips.appendChild(b);
     });
-    inp.placeholder = step.placeholder || 'Or type your own answer...';
-    inp.disabled = false;
   } else {
-    chipsArea.style.display = 'none';
-    inp.placeholder = step.placeholder || 'Type your answer...';
-    inp.disabled = false;
+    chips.style.display = 'none';
   }
-  inp.focus();
+  document.getElementById('inp').placeholder = s.ph || 'Type your answer...';
+  document.getElementById('inp').disabled = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('inp').focus();
 }
 
-function selectChip(value) {
-  submitAnswer(value);
+function submitAns(val) {
+  if (busy || done) return;
+  const s = FLOW[step];
+  answers[s.key] = val;
+  addMsg('user', val);
+  document.getElementById('chips').style.display = 'none';
+  document.getElementById('inp').disabled = true;
+  document.getElementById('send-btn').disabled = true;
+  step++;
+  setProgress(step);
+  if (step < FLOW.length) {
+    setTimeout(()=>askStep(step), 450);
+  } else {
+    setTimeout(()=>finish(), 450);
+  }
 }
 
 function sendText() {
   const inp = document.getElementById('inp');
-  const text = inp.value.trim();
-  if (!text) return;
+  const v = inp.value.trim();
+  if (!v || busy || done) return;
   inp.value = ''; inp.style.height = 'auto';
-  submitAnswer(text);
+  submitAns(v);
 }
 
-function submitAnswer(value) {
-  const step = FLOW[currentStep];
-  answers[step.key] = value;
-
-  // Normalize automatable and impact
-  if (step.key === 'automatable') {
-    answers._automatable_bool = value.toLowerCase().includes('definitely') || value.toLowerCase().includes('probably');
-  }
-  if (step.key === 'impact') {
-    answers._impact_clean = value.toLowerCase().includes('high') ? 'high' : value.toLowerCase().includes('medium') || value.toLowerCase().includes('slow') ? 'medium' : 'low';
-  }
-
-  appendMsg('user', value);
-  document.getElementById('chips-area').style.display = 'none';
-  document.getElementById('inp').disabled = true;
-  document.getElementById('send-btn').disabled = true;
-
-  currentStep++;
-  const pct = Math.round((currentStep / TOTAL_STEPS) * 100);
-  updateProgress(currentStep);
-
-  if (currentStep < FLOW.length) {
-    // Brief pause before next question feels natural
-    setTimeout(() => {
-      document.getElementById('inp').disabled = false;
-      document.getElementById('send-btn').disabled = false;
-      askStep(currentStep);
-    }, 500);
-  } else {
-    setTimeout(() => finishFlow(), 500);
-  }
-}
-
-function finishFlow() {
-  // Build pain point object from answers
-  const tags = buildTags();
-  const roiScore = calcRoi();
+function finish() {
+  done = true;
+  const impact = (answers.impact||'').toLowerCase().includes('high') ? 'high'
+    : (answers.impact||'').toLowerCase().includes('medium') || (answers.impact||'').toLowerCase().includes('slow') ? 'medium' : 'low';
+  const isAuto = (answers.automatable||'').toLowerCase().includes('definitely') || (answers.automatable||'').toLowerCase().includes('probably');
+  const freq = (answers.frequency||'').toLowerCase();
+  let roi = 5;
+  if (impact==='high') roi+=2; if (impact==='low') roi-=1;
+  if (isAuto) roi+=2;
+  if (freq.includes('multiple')||freq.includes('daily')||freq.includes('day')) roi+=1;
+  if (freq.includes('monthly')) roi-=1;
+  roi = Math.min(10, Math.max(1, roi));
+  const tags = [];
+  if (isAuto) tags.push('automation candidate');
+  if (impact==='high') tags.push('high priority');
+  if (freq.includes('day')||freq.includes('multiple')) tags.push('daily friction');
+  if (answers.vertical) tags.push(answers.vertical.toLowerCase());
 
   const pp = {
-    id: 'pp_' + Date.now(),
+    id: 'pp_'+Date.now(),
     timestamp: new Date().toISOString(),
-    title: answers.title || 'Untitled pain point',
+    submitterName: answers.submitterName || '',
+    title: answers.title || 'Untitled',
     vertical: answers.vertical || 'Unknown',
-    submitterName: answers.submitterName || 'Anonymous',
-    problem: buildProblemStatement(),
+    problem: (answers.vertical||'Unknown')+' team: '+(answers.title||'')+'. Affects '+(answers.affected||'')+', occurs '+(answers.frequency||'')+'. Workaround: '+(answers.currentWorkaround||''),
     affected: answers.affected || '',
     frequency: answers.frequency || '',
     currentWorkaround: answers.currentWorkaround || '',
     desiredOutcome: answers.desiredOutcome || '',
-    impact: answers._impact_clean || 'medium',
-    automatable: answers._automatable_bool || false,
-    roiScore: roiScore,
+    impact: impact,
+    automatable: isAuto,
+    roiScore: roi,
     tags: tags
   };
 
-  appendMsg('ai', `Thank you ${answers.submitterName ? answers.submitterName.split(' ')[0] : ''} — I've documented everything. Here's a quick summary:\n\n👤 Submitted by: ${pp.submitterName}\n📍 Department: ${pp.vertical}\n⚠️ Issue: ${pp.title}\n👥 Affected: ${pp.affected}\n🔄 Frequency: ${pp.frequency}\n📊 Impact: ${pp.impact} · ROI score: ${pp.roiScore}/10\n\nThe digital innovation team will review this and may follow up with you directly.`);
-  updateProgress(TOTAL_STEPS);
-
-  // Save to backend
-  if (backendUrl) {
-    apiPost('save', { painPoint: pp }).catch(() => {});
-  }
-
+  addMsg('ai', 'Thank you '+(answers.submitterName?answers.submitterName.split(' ')[0]:'')+' — I\'ve documented everything.\n\n👤 Submitted by: '+pp.submitterName+'\n📍 Department: '+pp.vertical+'\n⚠️ Issue: '+pp.title+'\n👥 Affected: '+pp.affected+'\n🔄 Frequency: '+pp.frequency+'\n📊 Impact: '+pp.impact+' · ROI score: '+pp.roiScore+'/10\n\nThe digital innovation team will review this and may follow up with you directly.');
+  setProgress(FLOW.length);
   document.getElementById('done-card').style.display = 'flex';
-  document.getElementById('inp').disabled = true;
-  document.getElementById('send-btn').disabled = true;
-  document.getElementById('chips-area').style.display = 'none';
+
+  fetch(backendUrl, { method:'POST', body: JSON.stringify({action:'save', painPoint:pp}) }).catch(()=>{});
 }
 
-function buildProblemStatement() {
-  return `${answers.vertical} team faces: ${answers.title}. This affects ${answers.affected} and occurs ${answers.frequency}. Current workaround: ${answers.currentWorkaround}.`;
-}
-
-function buildTags() {
-  const tags = [];
-  if (answers._automatable_bool) tags.push('automation candidate');
-  if (answers.frequency && answers.frequency.toLowerCase().includes('day')) tags.push('daily friction');
-  if (answers._impact_clean === 'high') tags.push('high priority');
-  if (answers.vertical) tags.push(answers.vertical.toLowerCase());
-  return tags.slice(0, 4);
-}
-
-function calcRoi() {
-  let score = 5;
-  const impact = answers._impact_clean || 'medium';
-  const freq = (answers.frequency || '').toLowerCase();
-  const auto = answers._automatable_bool || false;
-  if (impact === 'high') score += 2;
-  if (impact === 'low') score -= 1;
-  if (auto) score += 2;
-  if (freq.includes('multiple') || freq.includes('daily') || freq.includes('day')) score += 1;
-  if (freq.includes('monthly')) score -= 1;
-  return Math.min(10, Math.max(1, score));
-}
-
-// ─── PROGRESS ────────────────────────────────────────────────
-function updateProgress(step) {
-  const pct = Math.min(100, Math.round((step / TOTAL_STEPS) * 100));
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-pct').textContent = pct + '%';
-  const labels = ['Getting started','Department','The challenge','Who is affected','Frequency','Current workaround','Desired outcome','Impact','Automation','Complete'];
-  document.getElementById('progress-text').textContent = labels[Math.min(step, labels.length-1)];
-}
-
-// ─── CHAT UI ─────────────────────────────────────────────────
-function appendMsg(role, text) {
+function addMsg(role, text) {
   const el = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'msg ' + role;
-  const avi = document.createElement('div'); avi.className = 'msg-avi';
-  avi.textContent = role === 'ai' ? 'N' : 'You';
-  const bub = document.createElement('div'); bub.className = 'bubble';
-  bub.style.whiteSpace = 'pre-wrap';
-  bub.textContent = text;
-  if (role === 'user') { div.appendChild(bub); div.appendChild(avi); }
-  else { div.appendChild(avi); div.appendChild(bub); }
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
+  const d = document.createElement('div'); d.className='msg '+role;
+  const a = document.createElement('div'); a.className='msg-avi'; a.textContent=role==='ai'?'N':'You';
+  const b = document.createElement('div'); b.className='bubble'; b.textContent=text;
+  if(role==='user'){d.appendChild(b);d.appendChild(a);}else{d.appendChild(a);d.appendChild(b);}
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
 }
 
-function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText();} }
-function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
-
-// ─── BACKEND ─────────────────────────────────────────────────
-async function apiPost(action, data) {
-  const res = await fetch(backendUrl, { method:'POST', body: JSON.stringify({action,...data}) });
-  return res.json();
-}
-async function apiGet(action) {
-  const res = await fetch(`${backendUrl}?action=${action}`);
-  return res.json();
+function setProgress(i) {
+  const pct = Math.min(100, Math.round((i/FLOW.length)*100));
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  const labels=['Getting started','Your name','Department','The challenge','Who is affected','Frequency','Workaround','Desired outcome','Impact level','Automation','Complete'];
+  document.getElementById('prog-label').textContent = labels[Math.min(i, labels.length-1)];
 }
 
-// ─── DASHBOARD ───────────────────────────────────────────────
-async function loadSubmissions() {
-  document.getElementById('pp-grid').innerHTML = '<div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div> Loading…</div>';
-  document.getElementById('priority-table').innerHTML = '<div class="loading-row"><div class="spinner"></div> Loading…</div>';
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText();} }
+function resize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+async function loadData() {
+  document.getElementById('priority-section').innerHTML = '<div class="spin-row"><div class="spinner"></div> Loading…</div>';
+  document.getElementById('cards-section').innerHTML = '<div class="empty-msg" style="grid-column:1/-1"><div class="spin-row" style="justify-content:center"><div class="spinner"></div> Loading…</div></div>';
+  document.getElementById('summary-section').style.display = 'none';
   try {
-    const data = await apiGet('list');
-    // Sanitize — filter out any rows missing required fields or with bad data
-    painPoints = (data.painPoints || []).filter(p =>
-      p.id && p.title && p.vertical &&
-      typeof p.roiScore === 'number' && !isNaN(p.roiScore)
-    );
-    renderDash();
+    const res = await fetch(backendUrl+'?action=list');
+    const data = await res.json();
+    painPoints = (data.painPoints||[]).map(p=>({...p, roiScore: Number(p.roiScore)||0}));
+    renderAll();
   } catch(e) {
-    const err = '<div class="empty"><p>Could not load. Check your backend URL and that the Apps Script is deployed as a web app.</p></div>';
-    document.getElementById('pp-grid').innerHTML = err;
-    document.getElementById('priority-table').innerHTML = err;
+    document.getElementById('priority-section').innerHTML = '<div class="empty-msg">Could not connect to backend. Check the URL above is correct and the Apps Script is deployed as a web app with access set to "Anyone".</div>';
+    document.getElementById('cards-section').innerHTML = '';
   }
 }
 
-function renderDash() {
+// ══════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════
+function renderAll() {
   const total = painPoints.length;
   const high = painPoints.filter(p=>p.impact==='high').length;
   const auto = painPoints.filter(p=>p.automatable).length;
-  const verts = new Set(painPoints.map(p=>p.vertical)).size;
-  document.getElementById('m-total').textContent = total||'0';
-  document.getElementById('m-high').textContent = high||'0';
-  document.getElementById('m-auto').textContent = auto||'0';
-  document.getElementById('m-verts').textContent = verts||'0';
+  const verts = new Set(painPoints.map(p=>p.vertical||'')).size;
+  document.getElementById('m-total').textContent = total;
+  document.getElementById('m-high').textContent = high;
+  document.getElementById('m-auto').textContent = auto;
+  document.getElementById('m-verts').textContent = verts;
   document.getElementById('dash-sub').textContent = total===0
-    ? 'No submissions yet — share the home page with your team.'
-    : `${total} submission${total>1?'s':''} across ${verts} vertical${verts!==1?'s':''} · Last refreshed ${new Date().toLocaleTimeString()}`;
+    ? 'No submissions yet — share the home page link with your team.'
+    : total+' submission'+(total>1?'s':'')+' across '+verts+' vertical'+(verts!==1?'s':'')+' · Refreshed '+new Date().toLocaleTimeString();
   renderSummary();
-  renderPriorityTable();
-  renderPainPoints();
+  renderPriority();
+  renderCards();
   renderPrds();
 }
 
 function renderSummary() {
-  if (!painPoints.length) { document.getElementById('summary-panel').style.display='none'; return; }
-  document.getElementById('summary-panel').style.display='block';
+  if (!painPoints.length) return;
+  document.getElementById('summary-section').style.display = 'block';
+  const total = painPoints.length;
 
-  // By vertical
-  const vertMap = {};
-  painPoints.forEach(p => { vertMap[p.vertical] = (vertMap[p.vertical]||0) + 1; });
-  const vertSorted = Object.entries(vertMap).sort((a,b)=>b[1]-a[1]);
-  const maxVert = vertSorted[0]?.[1] || 1;
-  document.getElementById('summary-verticals').innerHTML = vertSorted.map(([v,n])=>`
+  // Verticals
+  const vm = {}; painPoints.forEach(p=>{ vm[p.vertical]=(vm[p.vertical]||0)+1; });
+  const vs = Object.entries(vm).sort((a,b)=>b[1]-a[1]);
+  const mx = vs[0]?.[1]||1;
+  document.getElementById('sum-verts').innerHTML = vs.map(([v,n])=>`
     <div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
         <span style="color:var(--gray700);font-weight:500">${esc(v)}</span>
-        <span style="color:var(--gray400)">${n} submission${n>1?'s':''}</span>
+        <span style="color:var(--gray400)">${n}</span>
       </div>
       <div style="height:4px;background:var(--gray100);border-radius:2px">
-        <div style="height:100%;border-radius:2px;background:var(--p600);width:${Math.round((n/maxVert)*100)}%"></div>
+        <div style="height:100%;border-radius:2px;background:var(--p600);width:${Math.round(n/mx*100)}%"></div>
       </div>
     </div>`).join('');
 
-  // By impact
-  const impactData = [
-    { label:'High', key:'high', color:'var(--r500)', bg:'var(--r100)' },
-    { label:'Medium', key:'medium', color:'var(--a500)', bg:'var(--a100)' },
-    { label:'Low', key:'low', color:'var(--g500)', bg:'var(--g100)' }
-  ];
-  document.getElementById('summary-impact').innerHTML = impactData.map(i=>{
-    const n = painPoints.filter(p=>p.impact===i.key).length;
-    const pct = total ? Math.round((n/total)*100) : 0;
-    return `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="width:70px;font-size:12px;font-weight:500;color:${i.color}">${i.label}</div>
-        <div style="flex:1;height:20px;background:var(--gray100);border-radius:4px;overflow:hidden">
-          <div style="height:100%;background:${i.bg};border-right:2px solid ${i.color};width:${pct}%;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:4px">
-            ${pct>10?`<span style="font-size:10px;font-weight:600;color:${i.color}">${pct}%</span>`:''}
-          </div>
-        </div>
-        <div style="width:20px;font-size:12px;color:var(--gray500);text-align:right">${n}</div>
-      </div>`;
+  // Impact
+  const impacts = [{k:'high',l:'High',c:'var(--r500)',b:'var(--r100)'},{k:'medium',l:'Medium',c:'var(--a500)',b:'var(--a100)'},{k:'low',l:'Low',c:'var(--g500)',b:'var(--g100)'}];
+  document.getElementById('sum-impact').innerHTML = impacts.map(i=>{
+    const n = painPoints.filter(p=>p.impact===i.k).length;
+    const pct = total ? Math.round(n/total*100) : 0;
+    return `<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+      <div style="width:60px;font-size:12px;font-weight:500;color:${i.c}">${i.l}</div>
+      <div style="flex:1;height:18px;background:var(--gray100);border-radius:4px;overflow:hidden">
+        <div style="height:100%;background:${i.b};border-right:2px solid ${i.c};width:${pct}%"></div>
+      </div>
+      <div style="width:24px;font-size:12px;color:var(--gray500);text-align:right">${n}</div>
+    </div>`;
   }).join('');
 
-  // Tags / themes
-  const tagMap = {};
-  painPoints.forEach(p => (p.tags||[]).forEach(t => { tagMap[t]=(tagMap[t]||0)+1; }));
-  const tagSorted = Object.entries(tagMap).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('summary-tags').innerHTML = tagSorted.length
-    ? tagSorted.map(([t,n])=>`<span style="background:var(--p100);color:var(--p700);font-size:12px;padding:4px 12px;border-radius:100px;font-weight:500">${esc(t)} <span style="opacity:.6">×${n}</span></span>`).join('')
+  // Tags
+  const tm = {}; painPoints.forEach(p=>(p.tags||[]).forEach(t=>{ tm[t]=(tm[t]||0)+1; }));
+  const ts = Object.entries(tm).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('sum-tags').innerHTML = ts.length
+    ? ts.map(([t,n])=>`<span style="background:var(--p100);color:var(--p700);font-size:12px;padding:4px 12px;border-radius:100px;font-weight:500">${esc(t)} <span style="opacity:.55">×${n}</span></span>`).join('')
     : '<span style="font-size:13px;color:var(--gray400)">No tags yet</span>';
 
-  // Automation opps
-  const autoItems = painPoints.filter(p=>p.automatable);
-  document.getElementById('summary-auto').innerHTML = autoItems.length
-    ? autoItems.map(p=>`
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <div style="width:6px;height:6px;border-radius:50%;background:var(--t500);flex-shrink:0"></div>
-          <div style="font-size:13px;color:var(--gray800);flex:1">${esc(p.title)}</div>
-          <span style="font-size:11px;background:white;color:var(--t500);border:1px solid #5DCAA5;padding:2px 8px;border-radius:100px;font-weight:500">${esc(p.vertical)}</span>
-          <span style="font-size:11px;font-weight:600;color:var(--p600);min-width:32px;text-align:right">ROI ${p.roiScore}/10</span>
-        </div>`).join('')
+  // Auto
+  const ai = painPoints.filter(p=>p.automatable);
+  document.getElementById('sum-auto').innerHTML = ai.length
+    ? ai.map(p=>`<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--t500);flex-shrink:0"></div>
+        <div style="font-size:13px;color:var(--gray800);flex:1">${esc(p.title)}</div>
+        <span style="font-size:11px;background:#fff;color:var(--t500);border:1px solid #5DCAA5;padding:2px 8px;border-radius:100px">${esc(p.vertical)}</span>
+        <span style="font-size:11px;font-weight:600;color:var(--p600)">ROI ${p.roiScore}/10</span>
+      </div>`).join('')
     : '<p style="font-size:13px;color:var(--t500)">No automation candidates identified yet.</p>';
 }
 
-function renderPriorityTable() {
-  const el = document.getElementById('priority-table');
-  if (!painPoints.length) {
-    el.innerHTML = '<div class="empty"><p>No submissions yet.</p></div>';
-    return;
-  }
+function renderPriority() {
+  const el = document.getElementById('priority-section');
+  if (!painPoints.length) { el.innerHTML='<div class="empty-msg">No submissions yet.</div>'; return; }
   const sorted = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0));
-  el.innerHTML = `
-    <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);overflow:hidden">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead>
-          <tr style="background:var(--gray50);border-bottom:1px solid var(--gray200)">
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px;width:32px">#</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Pain point</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Department</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Submitted by</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Impact</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Auto</th>
-            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">ROI</th>
-            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Priority</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${sorted.map((p,i)=>{
-            const priority = p.roiScore >= 8 ? {label:'Act now', bg:'var(--r100)', color:'var(--r500)'}
-              : p.roiScore >= 6 ? {label:'High priority', bg:'var(--a100)', color:'var(--a500)'}
-              : p.roiScore >= 4 ? {label:'Plan ahead', bg:'var(--p100)', color:'var(--p600)'}
-              : {label:'Monitor', bg:'var(--gray100)', color:'var(--gray500)'};
-            return `
-              <tr style="border-bottom:1px solid var(--gray200);${i%2===1?'background:var(--gray50)':''}">
-                <td style="padding:12px 14px;color:var(--gray400);font-weight:600">${i+1}</td>
-                <td style="padding:12px 14px;color:var(--gray900);font-weight:500;max-width:220px">${esc(p.title)}</td>
-                <td style="padding:12px 14px"><span class="tag vertical">${esc(p.vertical)}</span></td>
-                <td style="padding:12px 14px;color:var(--gray600)">${esc(p.submitterName||'Anonymous')}</td>
-                <td style="padding:12px 14px;text-align:center"><span class="tag ${p.impact}">${p.impact}</span></td>
-                <td style="padding:12px 14px;text-align:center;font-size:16px">${p.automatable?'✓':''}</td>
-                <td style="padding:12px 14px;text-align:center">
-                  <div style="display:flex;align-items:center;gap:6px;justify-content:center">
-                    <div style="width:40px;height:4px;background:var(--gray200);border-radius:2px">
-                      <div style="height:100%;border-radius:2px;background:var(--p600);width:${((p.roiScore||0)*10)}%"></div>
-                    </div>
-                    <span style="font-size:12px;font-weight:600;color:var(--p600)">${p.roiScore}</span>
-                  </div>
-                </td>
-                <td style="padding:12px 14px"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:${priority.bg};color:${priority.color}">${priority.label}</span></td>
-              </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>`;
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Pain point</th><th>Department</th><th>Submitted by</th>
+      <th>Impact</th><th>Auto</th><th>ROI</th><th>Priority</th>
+    </tr></thead>
+    <tbody>${sorted.map((p,i)=>{
+      const pr = p.roiScore>=8?{l:'Act now',bg:'var(--r100)',c:'var(--r500)'}
+        :p.roiScore>=6?{l:'High priority',bg:'var(--a100)',c:'var(--a500)'}
+        :p.roiScore>=4?{l:'Plan ahead',bg:'var(--p100)',c:'var(--p600)'}
+        :{l:'Monitor',bg:'var(--gray100)',c:'var(--gray500)'};
+      return `<tr>
+        <td style="color:var(--gray400);font-weight:600">${i+1}</td>
+        <td style="font-weight:500;color:var(--gray900);max-width:200px">${esc(p.title)}</td>
+        <td><span class="tag tag-vert">${esc(p.vertical)}</span></td>
+        <td style="color:var(--gray600)">${esc(p.submitterName||'—')}</td>
+        <td><span class="tag tag-${p.impact}">${p.impact}</span></td>
+        <td style="text-align:center;font-size:15px">${p.automatable?'✓':''}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:5px">
+            <div style="width:36px;height:4px;background:var(--gray200);border-radius:2px">
+              <div style="height:100%;border-radius:2px;background:var(--p600);width:${(p.roiScore||0)*10}%"></div>
+            </div>
+            <span style="font-size:12px;font-weight:600;color:var(--p600)">${p.roiScore}</span>
+          </div>
+        </td>
+        <td><span class="priority-pill" style="background:${pr.bg};color:${pr.c}">${pr.l}</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
 }
 
-function renderPainPoints() {
-  const grid = document.getElementById('pp-grid');
-  if (!painPoints.length) {
-    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No pain points yet.<br>Share the home page link with your team to start collecting.</p></div>';
-    return;
-  }
-  grid.innerHTML = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).map(p=>`
+function renderCards() {
+  const el = document.getElementById('cards-section');
+  if (!painPoints.length) { el.innerHTML='<div class="empty-msg" style="grid-column:1/-1">No submissions yet.</div>'; return; }
+  el.innerHTML = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).map(p=>`
     <div class="pp-card">
-      <div class="pp-card-top"><div class="pp-title">${esc(p.title)}</div><div class="pp-date">${new Date(p.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>
-      <div style="font-size:11px;color:var(--gray400);margin-bottom:6px">👤 ${esc(p.submitterName||'Anonymous')} · ${esc(p.vertical)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+        <div class="pp-title">${esc(p.title)}</div>
+        <div style="font-size:11px;color:var(--gray400);white-space:nowrap;margin-left:10px">${new Date(p.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+      </div>
+      <div class="pp-meta">👤 ${esc(p.submitterName||'—')} · ${esc(p.vertical)}</div>
       <div class="pp-problem">${esc(p.problem)}</div>
-      <div class="pp-tags">
-        <span class="tag vertical">${esc(p.vertical)}</span>
-        <span class="tag ${p.impact}">${p.impact} impact</span>
-        ${p.automatable?'<span class="tag auto">automatable</span>':''}
-        ${(p.tags||[]).map(t=>`<span class="tag neutral">${esc(t)}</span>`).join('')}
+      ${p.desiredOutcome?`<div class="pp-outcome"><strong style="color:var(--gray700)">Desired outcome:</strong> ${esc(p.desiredOutcome)}</div>`:''}
+      <div class="tags">
+        <span class="tag tag-vert">${esc(p.vertical)}</span>
+        <span class="tag tag-${p.impact}">${p.impact} impact</span>
+        ${p.automatable?'<span class="tag tag-auto">automatable</span>':''}
+        ${(p.tags||[]).map(t=>`<span class="tag tag-neutral">${esc(t)}</span>`).join('')}
       </div>
-      <div style="margin-top:10px;padding:10px;background:var(--gray50);border-radius:8px;font-size:12px;color:var(--gray600);line-height:1.5">
-        <strong style="color:var(--gray700)">Desired outcome:</strong> ${esc(p.desiredOutcome)}
+      <div class="roi-row">
+        <div class="roi-bar"><div class="roi-fill" style="width:${(p.roiScore||0)*10}%"></div></div>
+        <span class="roi-val">${p.roiScore||0}/10</span>
       </div>
-      <div class="roi-row"><div class="roi-bar"><div class="roi-fill" style="width:${((p.roiScore||0)*10)}%"></div></div><span class="roi-val">${p.roiScore}/10</span></div>
     </div>`).join('');
 }
 
-// ─── PRD — CLIPBOARD FLOW ────────────────────────────────────
 function renderPrds() {
-  const list = document.getElementById('prd-list');
-  if (!painPoints.length) { list.innerHTML=''; return; }
-  list.innerHTML = painPoints.map(p=>`
+  const el = document.getElementById('prd-section');
+  if (!painPoints.length) { el.innerHTML=''; return; }
+  el.innerHTML = [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).map(p=>`
     <div class="prd-card">
       <div class="prd-hd" onclick="togglePrd('${p.id}')">
-        <div><div class="prd-hd-title">${esc(p.title)}</div><div class="prd-hd-sub">${esc(p.vertical)} · ROI ${p.roiScore}/10 · ${p.impact} impact</div></div>
+        <div>
+          <div class="prd-hd-title">${esc(p.title)}</div>
+          <div class="prd-hd-sub">${esc(p.vertical)} · ROI ${p.roiScore||0}/10 · ${p.impact} impact</div>
+        </div>
         <div class="prd-hd-right">
-          ${!p.prd
-            ? `<button class="copy-prd-btn" onclick="copyPrdPrompt(event,'${p.id}')">📋 Copy prompt for Claude</button>
-               <button class="paste-prd-btn" onclick="openPasteModal(event,'${p.id}')">↙ Paste response</button>`
-            : `<span class="prd-ready-badge">✓ PRD ready</span>
-               <button class="paste-prd-btn" onclick="openPasteModal(event,'${p.id}')">↙ Update</button>`}
+          ${p.prd
+            ? `<span class="prd-ready">✓ PRD ready</span>
+               <button class="btn-paste" onclick="openPaste(event,'${p.id}')">↙ Update</button>`
+            : `<button class="btn-copy" onclick="copyPrompt(event,'${p.id}')">📋 Copy prompt</button>
+               <button class="btn-paste" onclick="openPaste(event,'${p.id}')">↙ Paste response</button>`}
           <span class="chevron" id="chev-${p.id}">›</span>
         </div>
       </div>
       <div class="prd-body" id="pb-${p.id}">
-        ${p.prd ? prdHtml(p.prd) : '<p class="prd-full" style="font-size:13px;color:#888">Click "Copy prompt for Claude", paste it into claude.ai, then paste the response back using "Paste response".</p>'}
+        ${p.prd ? renderPrdBody(p.prd) : '<p class="prd-full" style="font-size:13px;color:var(--gray400)">Copy the prompt, paste it into claude.ai, then paste the response back here.</p>'}
       </div>
     </div>`).join('');
 }
 
-function copyPrdPrompt(e, id) {
+function togglePrd(id) {
+  const b = document.getElementById('pb-'+id);
+  const c = document.getElementById('chev-'+id);
+  b.classList.toggle('open');
+  c.style.transform = b.classList.contains('open') ? 'rotate(90deg)' : '';
+}
+
+function renderPrdBody(prd) {
+  const solCards = (prd.proposedSolutions||[]).map(s=>`
+    <div style="background:var(--gray50);border:1px solid var(--gray200);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--gray900)">${esc(s.name)}</div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <span class="cchip">${esc(s.implementationComplexity)}</span>
+          <span class="cchip">⏱ ${esc(s.estimatedTimeline)}</span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--gray600);line-height:1.5;margin-bottom:9px">${esc(s.description)}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Pros</div>
+          <ul style="padding-left:13px">${(s.pros||[]).map(x=>`<li style="font-size:12px;color:var(--g500);margin-bottom:2px">${esc(x)}</li>`).join('')}</ul></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Cons</div>
+          <ul style="padding-left:13px">${(s.cons||[]).map(x=>`<li style="font-size:12px;color:var(--r500);margin-bottom:2px">${esc(x)}</li>`).join('')}</ul></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;border-top:1px solid var(--gray200);padding-top:9px">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:2px;font-weight:600">Team</div><div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).team||'—')}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:2px;font-weight:600">Budget</div><div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).budget||'—')}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:2px;font-weight:600">Time saved/wk</div><div style="font-size:12px;color:var(--gray700)">${esc((s.potentialROI||{}).timesSavedPerWeek||'—')}</div></div>
+      </div>
+      <div style="margin-top:7px;padding:7px 10px;background:var(--p100);border-radius:7px;font-size:12px;color:var(--p700)"><strong>ROI:</strong> ${esc((s.potentialROI||{}).estimatedROIScore||'—')} · ${esc((s.potentialROI||{}).qualitativeGains||'')}</div>
+    </div>`).join('');
+
+  const phases = ((prd.recommendedSolution||{}).implementationPhases||[]).map(ph=>`
+    <div style="display:flex;gap:9px;margin-bottom:7px;align-items:flex-start">
+      <div style="background:var(--p600);color:#fff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;white-space:nowrap;margin-top:1px">${esc(ph.phase)}</div>
+      <div><div style="font-size:11px;color:var(--gray400);margin-bottom:1px">${esc(ph.duration)}</div><div style="font-size:12px;color:var(--gray700)">${esc(ph.description)}</div></div>
+    </div>`).join('');
+
+  return `
+    <div class="prd-sec prd-full"><h4>Executive summary</h4><p>${esc(prd.executiveSummary)}</p></div>
+    <div class="prd-sec"><h4>Root cause</h4><p>${esc((prd.problemAnalysis||{}).rootCause)}</p></div>
+    <div class="prd-sec"><h4>Risk of inaction</h4><p>${esc((prd.problemAnalysis||{}).riskOfInaction)}</p></div>
+    <div class="prd-sec"><h4>Business impact</h4><p>${esc((prd.problemAnalysis||{}).businessImpact)}</p></div>
+    <div class="prd-sec"><h4>Current state gaps</h4><ul>${((prd.problemAnalysis||{}).currentStateGaps||[]).map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div>
+    <div class="prd-sec prd-full"><h4>Proposed solutions</h4>${solCards}</div>
+    <div class="prd-sec prd-full"><h4 style="color:var(--p600)">★ Recommended — ${esc((prd.recommendedSolution||{}).name)}</h4>
+      <p style="margin-bottom:10px">${esc((prd.recommendedSolution||{}).justification)}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:5px;font-weight:600">MVP scope</div>
+          <ul>${((prd.recommendedSolution||{}).mvpScope||[]).map(m=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:2px">${esc(m)}</li>`).join('')}</ul></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:5px;font-weight:600">User stories</div>
+          <ul>${((prd.recommendedSolution||{}).userStories||[]).map(s=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:2px">${esc(s)}</li>`).join('')}</ul></div>
+      </div>
+      <div style="margin-top:12px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:7px;font-weight:600">Implementation phases</div>${phases}</div>
+    </div>
+    <div class="prd-sec"><h4>Open questions</h4><ul>${(prd.openQuestions||[]).map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>
+    <div class="prd-sec"><h4>Next steps</h4><ul>${(prd.suggestedNextSteps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`;
+}
+
+// ══════════════════════════════════════════════════
+// PRD CLIPBOARD FLOW
+// ══════════════════════════════════════════════════
+function copyPrompt(e, id) {
   e.stopPropagation();
-  const pp = painPoints.find(p=>p.id===id);
-  if (!pp) return;
+  const pp = painPoints.find(p=>p.id===id); if(!pp) return;
+  const prompt = `You are a senior digital innovation consultant at a hospital corporate team. A pain point has been submitted. Produce a detailed innovation brief for leadership review.
 
-  const prompt = `You are a senior digital innovation consultant and product manager embedded at a hospital corporate team. A pain point has been submitted through our internal system. Your job is to produce a detailed innovation brief that will be reviewed by hospital leadership to decide whether and how to act on this problem.
-
---- SUBMITTED PAIN POINT ---
+--- PAIN POINT ---
 Title: ${pp.title}
-Submitted by: ${pp.submitterName || 'Anonymous'}
+Submitted by: ${pp.submitterName||'Anonymous'}
 Department: ${pp.vertical}
 Problem: ${pp.problem}
 Who is affected: ${pp.affected}
 Frequency: ${pp.frequency}
 Current workaround: ${pp.currentWorkaround}
 Desired outcome: ${pp.desiredOutcome}
-Impact level: ${pp.impact}
-Automation potential: ${pp.automatable ? 'Yes' : 'No'}
-ROI Score (system calculated): ${pp.roiScore}/10
+Impact: ${pp.impact}
+Automatable: ${pp.automatable?'Yes':'No'}
+ROI Score: ${pp.roiScore}/10
 ---
 
-Please produce a comprehensive innovation brief using EXACTLY the following JSON structure. Be specific, detailed, and practical. Think like someone who has seen how hospitals operate and understands both the clinical/admin context and the digital solution landscape.
+Respond ONLY with a JSON object — no markdown fences, no text before or after:
+{"executiveSummary":"3-4 sentence summary of the problem and why it matters","problemAnalysis":{"rootCause":"underlying root cause","businessImpact":"specific impact on productivity/cost/morale","currentStateGaps":["gap1","gap2","gap3"],"riskOfInaction":"what happens if not addressed in 6-12 months"},"proposedSolutions":[{"name":"Solution name","description":"2-3 sentences","approach":"how it would be implemented","pros":["pro1","pro2","pro3"],"cons":["con1","con2"],"estimatedTimeline":"e.g. 8-12 weeks","implementationComplexity":"Low/Medium/High","resourcesRequired":{"team":"e.g. 1 developer + 1 designer","budget":"e.g. Low — internal build","dependencies":"e.g. IT security review"},"potentialROI":{"timesSavedPerWeek":"e.g. 10-15 hours/week","qualitativeGains":"e.g. Reduced errors","estimatedROIScore":"7/10 — justification"}},{"name":"Solution 2 name","description":"...","approach":"...","pros":["..."],"cons":["..."],"estimatedTimeline":"...","implementationComplexity":"...","resourcesRequired":{"team":"...","budget":"...","dependencies":"..."},"potentialROI":{"timesSavedPerWeek":"...","qualitativeGains":"...","estimatedROIScore":"..."}},{"name":"Solution 3 name","description":"...","approach":"...","pros":["..."],"cons":["..."],"estimatedTimeline":"...","implementationComplexity":"...","resourcesRequired":{"team":"...","budget":"...","dependencies":"..."},"potentialROI":{"timesSavedPerWeek":"...","qualitativeGains":"...","estimatedROIScore":"..."}}],"recommendedSolution":{"name":"recommended solution name","justification":"2-3 sentences why","mvpScope":["feature1","feature2","feature3","feature4","feature5"],"userStories":["As a [role] I want [action] so that [outcome]","story2","story3","story4"],"implementationPhases":[{"phase":"Phase 1","duration":"Weeks 1-2","description":"what happens"},{"phase":"Phase 2","duration":"Weeks 3-6","description":"what happens"},{"phase":"Phase 3","duration":"Weeks 7-10","description":"what happens"}]},"openQuestions":["question1","question2","question3","question4"],"suggestedNextSteps":["step1 — who does what","step2","step3"]}`;
 
-Respond ONLY with a JSON object — no markdown fences, no text before or after it:
-
-{
-  "executiveSummary": "3-4 sentence executive summary of the problem and why it matters to the organization. Include the business impact, who is affected, and why solving it is a strategic priority.",
-
-  "problemAnalysis": {
-    "rootCause": "What is the underlying root cause of this problem — not just the symptom",
-    "businessImpact": "Specific impact on productivity, cost, staff morale, patient experience, or compliance",
-    "currentStateGaps": ["Gap 1 in current process or tooling", "Gap 2", "Gap 3"],
-    "riskOfInaction": "What happens if this is not addressed in the next 6-12 months"
-  },
-
-  "proposedSolutions": [
-    {
-      "name": "Solution name (e.g. Custom Internal Web Tool)",
-      "description": "2-3 sentence description of what this solution is and how it addresses the problem",
-      "approach": "How it would be built or implemented",
-      "pros": ["Pro 1", "Pro 2", "Pro 3"],
-      "cons": ["Con 1", "Con 2"],
-      "estimatedTimeline": "e.g. 8–12 weeks",
-      "implementationComplexity": "Low / Medium / High",
-      "resourcesRequired": {
-        "team": "e.g. 1 developer + 1 designer + product manager",
-        "budget": "e.g. Low — internal build cost only",
-        "dependencies": "e.g. Access to hospital EHR data, IT security review"
-      },
-      "potentialROI": {
-        "timesSavedPerWeek": "e.g. 10–15 hours per week across the team",
-        "qualitativeGains": "e.g. Reduced errors, improved staff satisfaction",
-        "estimatedROIScore": "Score 1–10 with one sentence justification"
-      }
-    },
-    {
-      "name": "Solution name (e.g. Off-the-shelf SaaS Tool)",
-      "description": "2-3 sentence description",
-      "approach": "How it would be implemented",
-      "pros": ["Pro 1", "Pro 2", "Pro 3"],
-      "cons": ["Con 1", "Con 2"],
-      "estimatedTimeline": "e.g. 2–4 weeks",
-      "implementationComplexity": "Low / Medium / High",
-      "resourcesRequired": {
-        "team": "e.g. IT admin + department lead for onboarding",
-        "budget": "e.g. Medium — monthly SaaS subscription cost",
-        "dependencies": "e.g. Vendor data security assessment"
-      },
-      "potentialROI": {
-        "timesSavedPerWeek": "e.g. 8–10 hours per week",
-        "qualitativeGains": "e.g. Faster onboarding, vendor support included",
-        "estimatedROIScore": "Score 1–10 with justification"
-      }
-    },
-    {
-      "name": "Solution name (e.g. Process Redesign + Light Automation)",
-      "description": "2-3 sentence description",
-      "approach": "How it would be implemented",
-      "pros": ["Pro 1", "Pro 2"],
-      "cons": ["Con 1", "Con 2"],
-      "estimatedTimeline": "e.g. 3–5 weeks",
-      "implementationComplexity": "Low / Medium / High",
-      "resourcesRequired": {
-        "team": "e.g. Operations lead + department manager",
-        "budget": "e.g. Very low — no new tools required",
-        "dependencies": "e.g. Department head buy-in, process mapping workshop"
-      },
-      "potentialROI": {
-        "timesSavedPerWeek": "e.g. 4–6 hours per week",
-        "qualitativeGains": "e.g. Quick win, builds team confidence in change",
-        "estimatedROIScore": "Score 1–10 with justification"
-      }
-    }
-  ],
-
-  "recommendedSolution": {
-    "name": "Name of the solution you recommend",
-    "justification": "2-3 sentences explaining why this solution is the best fit given the hospital context, resources, and urgency",
-    "mvpScope": ["MVP feature or deliverable 1", "MVP feature 2", "MVP feature 3", "MVP feature 4", "MVP feature 5"],
-    "userStories": ["As a [role], I want [action] so that [outcome]", "story 2", "story 3", "story 4"],
-    "implementationPhases": [
-      {"phase": "Phase 1", "duration": "e.g. Weeks 1–2", "description": "What happens in this phase"},
-      {"phase": "Phase 2", "duration": "e.g. Weeks 3–6", "description": "What happens in this phase"},
-      {"phase": "Phase 3", "duration": "e.g. Weeks 7–10", "description": "What happens in this phase"}
-    ]
-  },
-
-  "openQuestions": ["Question that needs to be answered before starting", "Question 2", "Question 3", "Question 4"],
-
-  "suggestedNextSteps": ["Next step 1 — who should do what", "Next step 2", "Next step 3"]
-}`;
-
-  navigator.clipboard.writeText(prompt).then(() => {
+  navigator.clipboard.writeText(prompt).then(()=>{
     const btn = e.target.closest('button');
     const orig = btn.innerHTML;
-    btn.innerHTML = '✓ Copied!';
-    btn.style.background = 'var(--g500)';
-    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; }, 2000);
+    btn.innerHTML='✓ Copied!'; btn.style.background='var(--g500)';
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; },2000);
   });
 }
 
-function openPasteModal(e, id) {
+function openPaste(e, id) {
   e.stopPropagation();
   activePrdId = id;
-  document.getElementById('paste-area').value = '';
-  document.getElementById('paste-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('paste-area').focus(), 100);
+  document.getElementById('paste-inp').value='';
+  openModal('paste-modal');
+  setTimeout(()=>document.getElementById('paste-inp').focus(),100);
 }
 
-function closePasteModal() {
-  document.getElementById('paste-modal').classList.remove('open');
-  activePrdId = null;
-}
-
-async function savePastedPrd() {
-  const raw = document.getElementById('paste-area').value.trim();
+async function savePrd() {
+  const raw = document.getElementById('paste-inp').value.trim();
   if (!raw) { alert('Please paste Claude\'s response first.'); return; }
   try {
-    const clean = raw.replace(/```json|```/g,'').trim();
-    // Try to extract JSON if surrounded by text
-    const jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON found');
-    const prd = JSON.parse(jsonMatch[0]);
-
-    const pp = painPoints.find(p=>p.id===activePrdId);
-    if (!pp) return;
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON found');
+    const prd = JSON.parse(match[0]);
+    const pp = painPoints.find(p=>p.id===activePrdId); if(!pp) return;
     pp.prd = prd;
-
-    if (backendUrl) {
-      await apiPost('savePrd', { id: pp.id, prd });
-    }
-
-    closePasteModal();
+    await fetch(backendUrl, { method:'POST', body: JSON.stringify({action:'savePrd', id:pp.id, prd}) });
+    closeModal('paste-modal');
     renderPrds();
-    // Auto-open the PRD
-    const body = document.getElementById('pb-' + activePrdId);
-    if (body) body.classList.add('open');
+    const body = document.getElementById('pb-'+activePrdId);
+    if (body) { body.classList.add('open'); document.getElementById('chev-'+activePrdId).style.transform='rotate(90deg)'; }
   } catch(err) {
-    alert("Couldn't parse the response. Make sure you copied Claude's full reply and try again. If Claude added extra text before or after the JSON, that's fine — NAVIN will extract it automatically.");
+    alert('Could not parse the response. Make sure you copied Claude\'s full reply and try again.');
   }
 }
 
-function prdHtml(prd) {
-  const solutionCards = (prd.proposedSolutions||[]).map(s => `
-    <div style="background:var(--gray50);border:1px solid var(--gray200);border-radius:10px;padding:16px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div style="font-size:13px;font-weight:600;color:var(--gray900)">${esc(s.name)}</div>
-        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:12px">
-          <span class="cchip">${esc(s.implementationComplexity)} complexity</span>
-          <span class="cchip">⏱ ${esc(s.estimatedTimeline)}</span>
-        </div>
-      </div>
-      <p style="font-size:12px;color:var(--gray600);line-height:1.5;margin-bottom:10px">${esc(s.description)}</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Pros</div>
-          <ul style="padding-left:14px">${(s.pros||[]).map(p=>`<li style="font-size:12px;color:var(--g500);margin-bottom:2px">${esc(p)}</li>`).join('')}</ul>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Cons</div>
-          <ul style="padding-left:14px">${(s.cons||[]).map(c=>`<li style="font-size:12px;color:var(--r500);margin-bottom:2px">${esc(c)}</li>`).join('')}</ul>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--gray200);padding-top:10px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Team needed</div>
-          <div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).team||'—')}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Budget</div>
-          <div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).budget||'—')}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Time saved/week</div>
-          <div style="font-size:12px;color:var(--gray700)">${esc((s.potentialROI||{}).timesSavedPerWeek||'—')}</div>
-        </div>
-      </div>
-      <div style="margin-top:8px;padding:8px 10px;background:var(--p100);border-radius:8px;font-size:12px;color:var(--p700)">
-        <strong>ROI:</strong> ${esc((s.potentialROI||{}).estimatedROIScore||'—')} &nbsp;·&nbsp; ${esc((s.potentialROI||{}).qualitativeGains||'')}
-      </div>
-    </div>`).join('');
-
-  const phases = ((prd.recommendedSolution||{}).implementationPhases||[]).map(p=>`
-    <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start">
-      <div style="background:var(--p600);color:white;font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;white-space:nowrap;margin-top:2px">${esc(p.phase)}</div>
-      <div><div style="font-size:11px;color:var(--gray400);margin-bottom:1px">${esc(p.duration)}</div><div style="font-size:12px;color:var(--gray700)">${esc(p.description)}</div></div>
-    </div>`).join('');
-
-  return `
-    <div class="prd-section prd-full">
-      <h4>Executive summary</h4>
-      <p>${esc(prd.executiveSummary)}</p>
-    </div>
-
-    <div class="prd-section">
-      <h4>Root cause</h4>
-      <p>${esc((prd.problemAnalysis||{}).rootCause)}</p>
-    </div>
-    <div class="prd-section">
-      <h4>Risk of inaction</h4>
-      <p>${esc((prd.problemAnalysis||{}).riskOfInaction)}</p>
-    </div>
-    <div class="prd-section">
-      <h4>Business impact</h4>
-      <p>${esc((prd.problemAnalysis||{}).businessImpact)}</p>
-    </div>
-    <div class="prd-section">
-      <h4>Current state gaps</h4>
-      <ul>${((prd.problemAnalysis||{}).currentStateGaps||[]).map(g=>`<li>${esc(g)}</li>`).join('')}</ul>
-    </div>
-
-    <div class="prd-section prd-full">
-      <h4>Proposed solutions — analysis &amp; comparison</h4>
-      ${solutionCards}
-    </div>
-
-    <div class="prd-section prd-full">
-      <h4 style="color:var(--p600)">★ Recommended solution — ${esc((prd.recommendedSolution||{}).name)}</h4>
-      <p style="margin-bottom:10px">${esc((prd.recommendedSolution||{}).justification)}</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:6px;font-weight:600">MVP scope</div>
-          <ul>${((prd.recommendedSolution||{}).mvpScope||[]).map(m=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:3px">${esc(m)}</li>`).join('')}</ul>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:6px;font-weight:600">User stories</div>
-          <ul>${((prd.recommendedSolution||{}).userStories||[]).map(s=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:3px">${esc(s)}</li>`).join('')}</ul>
-        </div>
-      </div>
-      <div style="margin-top:14px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:8px;font-weight:600">Implementation phases</div>
-        ${phases}
-      </div>
-    </div>
-
-    <div class="prd-section">
-      <h4>Open questions</h4>
-      <ul>${(prd.openQuestions||[]).map(q=>`<li>${esc(q)}</li>`).join('')}</ul>
-    </div>
-    <div class="prd-section">
-      <h4>Suggested next steps</h4>
-      <ul>${(prd.suggestedNextSteps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
-    </div>`;
-}
-
-function togglePrd(id) {
-  const body = document.getElementById('pb-'+id);
-  const chev = document.getElementById('chev-'+id);
-  body.classList.toggle('open');
-  chev.style.transform = body.classList.contains('open')?'rotate(90deg)':'';
-}
-
+// ══════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════
 function exportReport() {
-  if (!painPoints.length) { alert('No pain points to export yet.'); return; }
-  const lines = ['NAVIN — Pain Point Intelligence Report','Generated: '+new Date().toLocaleString(),'='.repeat(60),''];
+  if (!painPoints.length) { alert('No submissions yet.'); return; }
+  const lines=['NAVIN — Pain Point Intelligence Report','Generated: '+new Date().toLocaleString(),'='.repeat(60),''];
   [...painPoints].sort((a,b)=>(b.roiScore||0)-(a.roiScore||0)).forEach((p,i)=>{
     lines.push(`${i+1}. ${p.title}`);
-    lines.push(`   Submitted by: ${p.submitterName||'Anonymous'} | Vertical: ${p.vertical} | Impact: ${p.impact} | ROI: ${p.roiScore}/10 | Automatable: ${p.automatable?'Yes':'No'}`);
+    lines.push(`   Submitted by: ${p.submitterName||'—'} | Vertical: ${p.vertical} | Impact: ${p.impact} | ROI: ${p.roiScore}/10 | Automatable: ${p.automatable?'Yes':'No'}`);
     lines.push(`   Problem: ${p.problem}`);
     lines.push(`   Affected: ${p.affected}`);
     lines.push(`   Workaround: ${p.currentWorkaround}`);
     lines.push(`   Desired outcome: ${p.desiredOutcome}`);
-    if (p.prd) { lines.push(`   Solution: ${p.prd.solution}`); lines.push(`   Timeline: ${p.prd.timeline} | Team: ${p.prd.teamSize} | Complexity: ${p.prd.complexity}`); }
+    if(p.prd){lines.push(`   Solution: ${p.prd.executiveSummary||''}`);lines.push(`   Recommended: ${(p.prd.recommendedSolution||{}).name||''}`)}
     lines.push('');
   });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
-  a.download = 'NAVIN-report-'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  a.download='NAVIN-report-'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
 }
 
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-
-// ─── INIT ────────────────────────────────────────────────────
-document.getElementById('pw-modal').classList.remove('open');
-document.getElementById('paste-modal').classList.remove('open');
-if (backendUrl) document.getElementById('backend-url-input').value = backendUrl;
+function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 </script>
 </body>
 </html>
