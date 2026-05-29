@@ -688,13 +688,20 @@ async function apiGet(action) {
 
 // ─── DASHBOARD ───────────────────────────────────────────────
 async function loadSubmissions() {
-  document.getElementById('pp-grid').innerHTML = '<div class="loading-row"><div class="spinner"></div> Loading…</div>';
+  document.getElementById('pp-grid').innerHTML = '<div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div> Loading…</div>';
+  document.getElementById('priority-table').innerHTML = '<div class="loading-row"><div class="spinner"></div> Loading…</div>';
   try {
     const data = await apiGet('list');
-    painPoints = data.painPoints || [];
+    // Sanitize — filter out any rows missing required fields or with bad data
+    painPoints = (data.painPoints || []).filter(p =>
+      p.id && p.title && p.vertical &&
+      typeof p.roiScore === 'number' && !isNaN(p.roiScore)
+    );
     renderDash();
   } catch(e) {
-    document.getElementById('pp-grid').innerHTML = '<div class="empty"><p>Could not load. Check your backend URL is correct and the Apps Script is deployed as a web app.</p></div>';
+    const err = '<div class="empty"><p>Could not load. Check your backend URL and that the Apps Script is deployed as a web app.</p></div>';
+    document.getElementById('pp-grid').innerHTML = err;
+    document.getElementById('priority-table').innerHTML = err;
   }
 }
 
