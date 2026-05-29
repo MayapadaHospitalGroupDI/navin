@@ -446,7 +446,9 @@ const FLOW = [
 const TOTAL_STEPS = FLOW.length;
 
 // ─── STATE ───────────────────────────────────────────────────
-let backendUrl = localStorage.getItem('navin_backend_url') || 'https://script.google.com/macros/s/AKfycbwZZTnw8Xt2MqTLvsGPR5DE8MtLHuiFTc0kFxwWQ1VERa72Ug8nVMBwzvfN8fsIGqOV/exec';
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwZZTnw8Xt2MqTLvsGPR5DE8MtLHuiFTc0kFxwWQ1VERa72Ug8nVMBwzvfN8fsIGqOV/exec';
+localStorage.setItem('navin_backend_url', BACKEND_URL); // always keep localStorage in sync
+let backendUrl = BACKEND_URL;
 let painPoints = [];
 let answers = {};
 let currentStep = 0;
