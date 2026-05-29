@@ -345,11 +345,16 @@ const DASHBOARD_PASSWORD = 'navin2024';
 // type: 'chips' = show chip buttons, 'text' = free text, 'both' = chips + text fallback
 const FLOW = [
   {
+    key: 'submitterName',
+    question: "Hi! I'm NAVIN 👋 I'm here to help document challenges your team faces so the digital innovation team can find the best solutions and follow up with you directly.\n\nFirst — what's your name?",
+    type: 'text',
+    placeholder: 'e.g. Sarah Reyes'
+  },
+  {
     key: 'vertical',
-    question: "Hi! I'm NAVIN 👋 I'm here to help document challenges your team faces so the digital innovation team can find the best solutions.\n\nFirst — which department or team are you from?",
-    type: 'chips',
-    chips: ['Finance', 'HR', 'Operations', 'Marketing', 'IT', 'Legal', 'Sales', 'Clinical', 'Admin', 'Other'],
-    placeholder: 'Or type your department...'
+    question: "Thanks {name}! Which department or team are you from?",
+    type: 'text',
+    placeholder: 'e.g. Finance, HR, Operations, Billing...'
   },
   {
     key: 'title',
@@ -464,7 +469,8 @@ function initChat() {
 function askStep(i) {
   if (i >= FLOW.length) { finishFlow(); return; }
   const step = FLOW[i];
-  appendMsg('ai', step.question);
+  const question = step.question.replace('{name}', answers.submitterName ? answers.submitterName.split(' ')[0] : '');
+  appendMsg('ai', question);
   updateProgress(i);
   showInputFor(step);
 }
@@ -548,6 +554,7 @@ function finishFlow() {
     timestamp: new Date().toISOString(),
     title: answers.title || 'Untitled pain point',
     vertical: answers.vertical || 'Unknown',
+    submitterName: answers.submitterName || 'Anonymous',
     problem: buildProblemStatement(),
     affected: answers.affected || '',
     frequency: answers.frequency || '',
@@ -559,7 +566,7 @@ function finishFlow() {
     tags: tags
   };
 
-  appendMsg('ai', `Thank you — I've documented everything. Here's a quick summary:\n\n📍 Department: ${pp.vertical}\n⚠️ Issue: ${pp.title}\n👥 Affected: ${pp.affected}\n🔄 Frequency: ${pp.frequency}\n📊 Impact: ${pp.impact} · ROI score: ${pp.roiScore}/10\n\nThis has been sent to the digital innovation team.`);
+  appendMsg('ai', `Thank you ${answers.submitterName ? answers.submitterName.split(' ')[0] : ''} — I've documented everything. Here's a quick summary:\n\n👤 Submitted by: ${pp.submitterName}\n📍 Department: ${pp.vertical}\n⚠️ Issue: ${pp.title}\n👥 Affected: ${pp.affected}\n🔄 Frequency: ${pp.frequency}\n📊 Impact: ${pp.impact} · ROI score: ${pp.roiScore}/10\n\nThe digital innovation team will review this and may follow up with you directly.`);
   updateProgress(TOTAL_STEPS);
 
   // Save to backend
@@ -672,6 +679,7 @@ function renderPainPoints() {
   grid.innerHTML = [...painPoints].sort((a,b)=>b.roiScore-a.roiScore).map(p=>`
     <div class="pp-card">
       <div class="pp-card-top"><div class="pp-title">${esc(p.title)}</div><div class="pp-date">${new Date(p.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>
+      <div style="font-size:11px;color:var(--gray400);margin-bottom:6px">👤 ${esc(p.submitterName||'Anonymous')} · ${esc(p.vertical)}</div>
       <div class="pp-problem">${esc(p.problem)}</div>
       <div class="pp-tags">
         <span class="tag vertical">${esc(p.vertical)}</span>
@@ -813,7 +821,7 @@ function exportReport() {
   const lines = ['NAVIN — Pain Point Intelligence Report','Generated: '+new Date().toLocaleString(),'='.repeat(60),''];
   [...painPoints].sort((a,b)=>b.roiScore-a.roiScore).forEach((p,i)=>{
     lines.push(`${i+1}. ${p.title}`);
-    lines.push(`   Vertical: ${p.vertical} | Impact: ${p.impact} | ROI: ${p.roiScore}/10 | Automatable: ${p.automatable?'Yes':'No'}`);
+    lines.push(`   Submitted by: ${p.submitterName||'Anonymous'} | Vertical: ${p.vertical} | Impact: ${p.impact} | ROI: ${p.roiScore}/10 | Automatable: ${p.automatable?'Yes':'No'}`);
     lines.push(`   Problem: ${p.problem}`);
     lines.push(`   Affected: ${p.affected}`);
     lines.push(`   Workaround: ${p.currentWorkaround}`);
