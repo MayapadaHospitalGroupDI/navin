@@ -291,17 +291,57 @@
     </div>
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
       <div class="dash-title">Pain Point Intelligence</div>
-      <button class="refresh-btn" onclick="loadSubmissions()">↻ Refresh</button>
+      <div style="display:flex;gap:8px">
+        <button class="refresh-btn" onclick="loadSubmissions()">↻ Refresh</button>
+        <button class="export-btn" onclick="exportReport()">Export report</button>
+      </div>
     </div>
     <div class="dash-sub" id="dash-sub">Connect your backend URL above to load submissions.</div>
+
     <div class="metrics">
       <div class="metric"><div class="lbl">Total submitted</div><div class="val" id="m-total">—</div></div>
       <div class="metric"><div class="lbl">High impact</div><div class="val" id="m-high">—</div><div class="hint">need priority attention</div></div>
       <div class="metric"><div class="lbl">Automatable</div><div class="val" id="m-auto">—</div><div class="hint">identified opportunities</div></div>
       <div class="metric"><div class="lbl">Verticals</div><div class="val" id="m-verts">—</div><div class="hint">departments represented</div></div>
     </div>
-    <div class="section-hd">Pain points by ROI <button class="export-btn" onclick="exportReport()">Export report</button></div>
-    <div class="pp-grid" id="pp-grid"><div class="loading-row"><div class="spinner"></div> Connect backend to load…</div></div>
+
+    <!-- SUMMARY PANEL -->
+    <div id="summary-panel" style="display:none;margin-bottom:28px">
+      <div class="section-hd" style="margin-bottom:12px">Submissions summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- By vertical -->
+        <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:12px">Submissions by department</div>
+          <div id="summary-verticals"></div>
+        </div>
+        <!-- By impact -->
+        <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:12px">Impact breakdown</div>
+          <div id="summary-impact"></div>
+        </div>
+      </div>
+      <!-- Recurring themes -->
+      <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray500);margin-bottom:10px">Recurring themes &amp; tags</div>
+        <div id="summary-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <!-- Automation opportunities -->
+      <div id="automation-panel" style="background:var(--t100);border:1px solid #5DCAA5;border-radius:var(--radius);padding:16px 20px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t500);margin-bottom:10px">🤖 Automation opportunities</div>
+        <div id="summary-auto"></div>
+      </div>
+    </div>
+
+    <!-- PRIORITY TABLE -->
+    <div class="section-hd" style="margin-bottom:12px">Priority ranking by ROI</div>
+    <div id="priority-table" style="margin-bottom:28px">
+      <div class="loading-row"><div class="spinner"></div> Connect backend to load…</div>
+    </div>
+
+    <!-- DETAIL CARDS -->
+    <div class="section-hd" style="margin-bottom:12px">All submissions — detail view</div>
+    <div class="pp-grid" id="pp-grid"></div>
+
     <div class="section-hd" style="margin-top:8px">
       Solution Studio — PRD Generator
       <span style="font-size:11px;font-weight:400;color:var(--gray400);text-transform:none;letter-spacing:0">Powered by your Claude subscription · free</span>
@@ -666,14 +706,130 @@ function renderDash() {
   document.getElementById('dash-sub').textContent = total===0
     ? 'No submissions yet — share the home page with your team.'
     : `${total} submission${total>1?'s':''} across ${verts} vertical${verts!==1?'s':''} · Last refreshed ${new Date().toLocaleTimeString()}`;
+  renderSummary();
+  renderPriorityTable();
   renderPainPoints();
   renderPrds();
+}
+
+function renderSummary() {
+  if (!painPoints.length) { document.getElementById('summary-panel').style.display='none'; return; }
+  document.getElementById('summary-panel').style.display='block';
+
+  // By vertical
+  const vertMap = {};
+  painPoints.forEach(p => { vertMap[p.vertical] = (vertMap[p.vertical]||0) + 1; });
+  const vertSorted = Object.entries(vertMap).sort((a,b)=>b[1]-a[1]);
+  const maxVert = vertSorted[0]?.[1] || 1;
+  document.getElementById('summary-verticals').innerHTML = vertSorted.map(([v,n])=>`
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span style="color:var(--gray700);font-weight:500">${esc(v)}</span>
+        <span style="color:var(--gray400)">${n} submission${n>1?'s':''}</span>
+      </div>
+      <div style="height:4px;background:var(--gray100);border-radius:2px">
+        <div style="height:100%;border-radius:2px;background:var(--p600);width:${Math.round((n/maxVert)*100)}%"></div>
+      </div>
+    </div>`).join('');
+
+  // By impact
+  const impactData = [
+    { label:'High', key:'high', color:'var(--r500)', bg:'var(--r100)' },
+    { label:'Medium', key:'medium', color:'var(--a500)', bg:'var(--a100)' },
+    { label:'Low', key:'low', color:'var(--g500)', bg:'var(--g100)' }
+  ];
+  document.getElementById('summary-impact').innerHTML = impactData.map(i=>{
+    const n = painPoints.filter(p=>p.impact===i.key).length;
+    const pct = total ? Math.round((n/total)*100) : 0;
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:70px;font-size:12px;font-weight:500;color:${i.color}">${i.label}</div>
+        <div style="flex:1;height:20px;background:var(--gray100);border-radius:4px;overflow:hidden">
+          <div style="height:100%;background:${i.bg};border-right:2px solid ${i.color};width:${pct}%;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:4px">
+            ${pct>10?`<span style="font-size:10px;font-weight:600;color:${i.color}">${pct}%</span>`:''}
+          </div>
+        </div>
+        <div style="width:20px;font-size:12px;color:var(--gray500);text-align:right">${n}</div>
+      </div>`;
+  }).join('');
+
+  // Tags / themes
+  const tagMap = {};
+  painPoints.forEach(p => (p.tags||[]).forEach(t => { tagMap[t]=(tagMap[t]||0)+1; }));
+  const tagSorted = Object.entries(tagMap).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('summary-tags').innerHTML = tagSorted.length
+    ? tagSorted.map(([t,n])=>`<span style="background:var(--p100);color:var(--p700);font-size:12px;padding:4px 12px;border-radius:100px;font-weight:500">${esc(t)} <span style="opacity:.6">×${n}</span></span>`).join('')
+    : '<span style="font-size:13px;color:var(--gray400)">No tags yet</span>';
+
+  // Automation opps
+  const autoItems = painPoints.filter(p=>p.automatable);
+  document.getElementById('summary-auto').innerHTML = autoItems.length
+    ? autoItems.map(p=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--t500);flex-shrink:0"></div>
+          <div style="font-size:13px;color:var(--gray800);flex:1">${esc(p.title)}</div>
+          <span style="font-size:11px;background:white;color:var(--t500);border:1px solid #5DCAA5;padding:2px 8px;border-radius:100px;font-weight:500">${esc(p.vertical)}</span>
+          <span style="font-size:11px;font-weight:600;color:var(--p600);min-width:32px;text-align:right">ROI ${p.roiScore}/10</span>
+        </div>`).join('')
+    : '<p style="font-size:13px;color:var(--t500)">No automation candidates identified yet.</p>';
+}
+
+function renderPriorityTable() {
+  const el = document.getElementById('priority-table');
+  if (!painPoints.length) {
+    el.innerHTML = '<div class="empty"><p>No submissions yet.</p></div>';
+    return;
+  }
+  const sorted = [...painPoints].sort((a,b)=>b.roiScore-a.roiScore);
+  el.innerHTML = `
+    <div style="background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:var(--gray50);border-bottom:1px solid var(--gray200)">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px;width:32px">#</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Pain point</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Department</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Submitted by</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Impact</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Auto</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">ROI</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--gray500);text-transform:uppercase;letter-spacing:.5px">Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map((p,i)=>{
+            const priority = p.roiScore >= 8 ? {label:'Act now', bg:'var(--r100)', color:'var(--r500)'}
+              : p.roiScore >= 6 ? {label:'High priority', bg:'var(--a100)', color:'var(--a500)'}
+              : p.roiScore >= 4 ? {label:'Plan ahead', bg:'var(--p100)', color:'var(--p600)'}
+              : {label:'Monitor', bg:'var(--gray100)', color:'var(--gray500)'};
+            return `
+              <tr style="border-bottom:1px solid var(--gray200);${i%2===1?'background:var(--gray50)':''}">
+                <td style="padding:12px 14px;color:var(--gray400);font-weight:600">${i+1}</td>
+                <td style="padding:12px 14px;color:var(--gray900);font-weight:500;max-width:220px">${esc(p.title)}</td>
+                <td style="padding:12px 14px"><span class="tag vertical">${esc(p.vertical)}</span></td>
+                <td style="padding:12px 14px;color:var(--gray600)">${esc(p.submitterName||'Anonymous')}</td>
+                <td style="padding:12px 14px;text-align:center"><span class="tag ${p.impact}">${p.impact}</span></td>
+                <td style="padding:12px 14px;text-align:center;font-size:16px">${p.automatable?'✓':''}</td>
+                <td style="padding:12px 14px;text-align:center">
+                  <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                    <div style="width:40px;height:4px;background:var(--gray200);border-radius:2px">
+                      <div style="height:100%;border-radius:2px;background:var(--p600);width:${p.roiScore*10}%"></div>
+                    </div>
+                    <span style="font-size:12px;font-weight:600;color:var(--p600)">${p.roiScore}</span>
+                  </div>
+                </td>
+                <td style="padding:12px 14px"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:${priority.bg};color:${priority.color}">${priority.label}</span></td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 function renderPainPoints() {
   const grid = document.getElementById('pp-grid');
   if (!painPoints.length) {
-    grid.innerHTML = '<div class="empty"><p>No pain points yet.<br>Share the home page link with your team to start collecting.</p></div>';
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No pain points yet.<br>Share the home page link with your team to start collecting.</p></div>';
     return;
   }
   grid.innerHTML = [...painPoints].sort((a,b)=>b.roiScore-a.roiScore).map(p=>`
@@ -686,6 +842,9 @@ function renderPainPoints() {
         <span class="tag ${p.impact}">${p.impact} impact</span>
         ${p.automatable?'<span class="tag auto">automatable</span>':''}
         ${(p.tags||[]).map(t=>`<span class="tag neutral">${esc(t)}</span>`).join('')}
+      </div>
+      <div style="margin-top:10px;padding:10px;background:var(--gray50);border-radius:8px;font-size:12px;color:var(--gray600);line-height:1.5">
+        <strong style="color:var(--gray700)">Desired outcome:</strong> ${esc(p.desiredOutcome)}
       </div>
       <div class="roi-row"><div class="roi-bar"><div class="roi-fill" style="width:${p.roiScore*10}%"></div></div><span class="roi-val">${p.roiScore}/10</span></div>
     </div>`).join('');
@@ -719,30 +878,111 @@ function copyPrdPrompt(e, id) {
   const pp = painPoints.find(p=>p.id===id);
   if (!pp) return;
 
-  const prompt = `You are a senior product manager at a hospital digital innovation team. Generate a concise PRD brief for this documented pain point.
+  const prompt = `You are a senior digital innovation consultant and product manager embedded at a hospital corporate team. A pain point has been submitted through our internal system. Your job is to produce a detailed innovation brief that will be reviewed by hospital leadership to decide whether and how to act on this problem.
 
-Pain point details:
-- Title: ${pp.title}
-- Department: ${pp.vertical}
-- Problem: ${pp.problem}
-- Affected: ${pp.affected}
-- Frequency: ${pp.frequency}
-- Current workaround: ${pp.currentWorkaround}
-- Desired outcome: ${pp.desiredOutcome}
-- Impact: ${pp.impact}
-- Automatable: ${pp.automatable ? 'Yes' : 'No'}
-- ROI Score: ${pp.roiScore}/10
+--- SUBMITTED PAIN POINT ---
+Title: ${pp.title}
+Submitted by: ${pp.submitterName || 'Anonymous'}
+Department: ${pp.vertical}
+Problem: ${pp.problem}
+Who is affected: ${pp.affected}
+Frequency: ${pp.frequency}
+Current workaround: ${pp.currentWorkaround}
+Desired outcome: ${pp.desiredOutcome}
+Impact level: ${pp.impact}
+Automation potential: ${pp.automatable ? 'Yes' : 'No'}
+ROI Score (system calculated): ${pp.roiScore}/10
+---
 
-Please respond ONLY with a JSON object in exactly this format (no markdown, no explanation before or after):
+Please produce a comprehensive innovation brief using EXACTLY the following JSON structure. Be specific, detailed, and practical. Think like someone who has seen how hospitals operate and understands both the clinical/admin context and the digital solution landscape.
+
+Respond ONLY with a JSON object — no markdown fences, no text before or after it:
+
 {
-  "problem": "clear 2-sentence problem statement",
-  "solution": "recommended digital solution — what type of tool, key capabilities, approach",
-  "userStories": ["As a [role], I want [action] so that [outcome]", "story 2", "story 3"],
-  "mvp": ["MVP feature 1", "MVP feature 2", "MVP feature 3", "MVP feature 4"],
-  "timeline": "e.g. 6–8 weeks",
-  "teamSize": "e.g. 2 developers + 1 designer",
-  "complexity": "low or medium or high",
-  "openQuestions": ["question 1", "question 2", "question 3"]
+  "executiveSummary": "3-4 sentence executive summary of the problem and why it matters to the organization. Include the business impact, who is affected, and why solving it is a strategic priority.",
+
+  "problemAnalysis": {
+    "rootCause": "What is the underlying root cause of this problem — not just the symptom",
+    "businessImpact": "Specific impact on productivity, cost, staff morale, patient experience, or compliance",
+    "currentStateGaps": ["Gap 1 in current process or tooling", "Gap 2", "Gap 3"],
+    "riskOfInaction": "What happens if this is not addressed in the next 6-12 months"
+  },
+
+  "proposedSolutions": [
+    {
+      "name": "Solution name (e.g. Custom Internal Web Tool)",
+      "description": "2-3 sentence description of what this solution is and how it addresses the problem",
+      "approach": "How it would be built or implemented",
+      "pros": ["Pro 1", "Pro 2", "Pro 3"],
+      "cons": ["Con 1", "Con 2"],
+      "estimatedTimeline": "e.g. 8–12 weeks",
+      "implementationComplexity": "Low / Medium / High",
+      "resourcesRequired": {
+        "team": "e.g. 1 developer + 1 designer + product manager",
+        "budget": "e.g. Low — internal build cost only",
+        "dependencies": "e.g. Access to hospital EHR data, IT security review"
+      },
+      "potentialROI": {
+        "timesSavedPerWeek": "e.g. 10–15 hours per week across the team",
+        "qualitativeGains": "e.g. Reduced errors, improved staff satisfaction",
+        "estimatedROIScore": "Score 1–10 with one sentence justification"
+      }
+    },
+    {
+      "name": "Solution name (e.g. Off-the-shelf SaaS Tool)",
+      "description": "2-3 sentence description",
+      "approach": "How it would be implemented",
+      "pros": ["Pro 1", "Pro 2", "Pro 3"],
+      "cons": ["Con 1", "Con 2"],
+      "estimatedTimeline": "e.g. 2–4 weeks",
+      "implementationComplexity": "Low / Medium / High",
+      "resourcesRequired": {
+        "team": "e.g. IT admin + department lead for onboarding",
+        "budget": "e.g. Medium — monthly SaaS subscription cost",
+        "dependencies": "e.g. Vendor data security assessment"
+      },
+      "potentialROI": {
+        "timesSavedPerWeek": "e.g. 8–10 hours per week",
+        "qualitativeGains": "e.g. Faster onboarding, vendor support included",
+        "estimatedROIScore": "Score 1–10 with justification"
+      }
+    },
+    {
+      "name": "Solution name (e.g. Process Redesign + Light Automation)",
+      "description": "2-3 sentence description",
+      "approach": "How it would be implemented",
+      "pros": ["Pro 1", "Pro 2"],
+      "cons": ["Con 1", "Con 2"],
+      "estimatedTimeline": "e.g. 3–5 weeks",
+      "implementationComplexity": "Low / Medium / High",
+      "resourcesRequired": {
+        "team": "e.g. Operations lead + department manager",
+        "budget": "e.g. Very low — no new tools required",
+        "dependencies": "e.g. Department head buy-in, process mapping workshop"
+      },
+      "potentialROI": {
+        "timesSavedPerWeek": "e.g. 4–6 hours per week",
+        "qualitativeGains": "e.g. Quick win, builds team confidence in change",
+        "estimatedROIScore": "Score 1–10 with justification"
+      }
+    }
+  ],
+
+  "recommendedSolution": {
+    "name": "Name of the solution you recommend",
+    "justification": "2-3 sentences explaining why this solution is the best fit given the hospital context, resources, and urgency",
+    "mvpScope": ["MVP feature or deliverable 1", "MVP feature 2", "MVP feature 3", "MVP feature 4", "MVP feature 5"],
+    "userStories": ["As a [role], I want [action] so that [outcome]", "story 2", "story 3", "story 4"],
+    "implementationPhases": [
+      {"phase": "Phase 1", "duration": "e.g. Weeks 1–2", "description": "What happens in this phase"},
+      {"phase": "Phase 2", "duration": "e.g. Weeks 3–6", "description": "What happens in this phase"},
+      {"phase": "Phase 3", "duration": "e.g. Weeks 7–10", "description": "What happens in this phase"}
+    ]
+  },
+
+  "openQuestions": ["Question that needs to be answered before starting", "Question 2", "Question 3", "Question 4"],
+
+  "suggestedNextSteps": ["Next step 1 — who should do what", "Next step 2", "Next step 3"]
 }`;
 
   navigator.clipboard.writeText(prompt).then(() => {
@@ -796,17 +1036,106 @@ async function savePastedPrd() {
 }
 
 function prdHtml(prd) {
+  const solutionCards = (prd.proposedSolutions||[]).map(s => `
+    <div style="background:var(--gray50);border:1px solid var(--gray200);border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600;color:var(--gray900)">${esc(s.name)}</div>
+        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:12px">
+          <span class="cchip">${esc(s.implementationComplexity)} complexity</span>
+          <span class="cchip">⏱ ${esc(s.estimatedTimeline)}</span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--gray600);line-height:1.5;margin-bottom:10px">${esc(s.description)}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Pros</div>
+          <ul style="padding-left:14px">${(s.pros||[]).map(p=>`<li style="font-size:12px;color:var(--g500);margin-bottom:2px">${esc(p)}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:4px;font-weight:600">Cons</div>
+          <ul style="padding-left:14px">${(s.cons||[]).map(c=>`<li style="font-size:12px;color:var(--r500);margin-bottom:2px">${esc(c)}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--gray200);padding-top:10px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Team needed</div>
+          <div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).team||'—')}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Budget</div>
+          <div style="font-size:12px;color:var(--gray700)">${esc((s.resourcesRequired||{}).budget||'—')}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:3px;font-weight:600">Time saved/week</div>
+          <div style="font-size:12px;color:var(--gray700)">${esc((s.potentialROI||{}).timesSavedPerWeek||'—')}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:8px 10px;background:var(--p100);border-radius:8px;font-size:12px;color:var(--p700)">
+        <strong>ROI:</strong> ${esc((s.potentialROI||{}).estimatedROIScore||'—')} &nbsp;·&nbsp; ${esc((s.potentialROI||{}).qualitativeGains||'')}
+      </div>
+    </div>`).join('');
+
+  const phases = ((prd.recommendedSolution||{}).implementationPhases||[]).map(p=>`
+    <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start">
+      <div style="background:var(--p600);color:white;font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;white-space:nowrap;margin-top:2px">${esc(p.phase)}</div>
+      <div><div style="font-size:11px;color:var(--gray400);margin-bottom:1px">${esc(p.duration)}</div><div style="font-size:12px;color:var(--gray700)">${esc(p.description)}</div></div>
+    </div>`).join('');
+
   return `
-    <div class="prd-section prd-full"><h4>Problem statement</h4><p>${esc(prd.problem)}</p></div>
-    <div class="prd-section prd-full"><h4>Proposed solution</h4><p>${esc(prd.solution)}</p></div>
-    <div class="prd-section"><h4>User stories</h4><ul>${(prd.userStories||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>
-    <div class="prd-section"><h4>MVP scope</h4><ul>${(prd.mvp||[]).map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>
-    <div class="prd-section"><h4>Implementation</h4><div class="complexity-chips">
-      <span class="cchip">⏱ ${esc(prd.timeline)}</span>
-      <span class="cchip">👥 ${esc(prd.teamSize)}</span>
-      <span class="cchip">${esc(prd.complexity)} complexity</span>
-    </div></div>
-    <div class="prd-section"><h4>Open questions</h4><ul>${(prd.openQuestions||[]).map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>`;
+    <div class="prd-section prd-full">
+      <h4>Executive summary</h4>
+      <p>${esc(prd.executiveSummary)}</p>
+    </div>
+
+    <div class="prd-section">
+      <h4>Root cause</h4>
+      <p>${esc((prd.problemAnalysis||{}).rootCause)}</p>
+    </div>
+    <div class="prd-section">
+      <h4>Risk of inaction</h4>
+      <p>${esc((prd.problemAnalysis||{}).riskOfInaction)}</p>
+    </div>
+    <div class="prd-section">
+      <h4>Business impact</h4>
+      <p>${esc((prd.problemAnalysis||{}).businessImpact)}</p>
+    </div>
+    <div class="prd-section">
+      <h4>Current state gaps</h4>
+      <ul>${((prd.problemAnalysis||{}).currentStateGaps||[]).map(g=>`<li>${esc(g)}</li>`).join('')}</ul>
+    </div>
+
+    <div class="prd-section prd-full">
+      <h4>Proposed solutions — analysis &amp; comparison</h4>
+      ${solutionCards}
+    </div>
+
+    <div class="prd-section prd-full">
+      <h4 style="color:var(--p600)">★ Recommended solution — ${esc((prd.recommendedSolution||{}).name)}</h4>
+      <p style="margin-bottom:10px">${esc((prd.recommendedSolution||{}).justification)}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:6px;font-weight:600">MVP scope</div>
+          <ul>${((prd.recommendedSolution||{}).mvpScope||[]).map(m=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:3px">${esc(m)}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:6px;font-weight:600">User stories</div>
+          <ul>${((prd.recommendedSolution||{}).userStories||[]).map(s=>`<li style="font-size:13px;color:var(--gray700);margin-bottom:3px">${esc(s)}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:8px;font-weight:600">Implementation phases</div>
+        ${phases}
+      </div>
+    </div>
+
+    <div class="prd-section">
+      <h4>Open questions</h4>
+      <ul>${(prd.openQuestions||[]).map(q=>`<li>${esc(q)}</li>`).join('')}</ul>
+    </div>
+    <div class="prd-section">
+      <h4>Suggested next steps</h4>
+      <ul>${(prd.suggestedNextSteps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+    </div>`;
 }
 
 function togglePrd(id) {
